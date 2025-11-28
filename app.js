@@ -109,12 +109,7 @@ async function drawAndProcessImage(img) {
     btnShare.disabled = false;
 }
 
-/* ------------------ منطق تاریخ فارسی ------------------
-
-const persianMonths = [
-    "فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور",
-    "مهر","آبان","آذر","دی","بهمن","اسفند"
-]; */
+/* ------------------ منطق تاریخ فارسی ------------------ */
 
 const persianWeekDays = [
     "یکشنبه","دوشنبه","سه\u200cشنبه","چهارشنبه","پنج\u200cشنبه","جمعه","شنبه"
@@ -283,14 +278,20 @@ async function addTextToCanvas(ctx, canvas, text) {
     const minDimension = Math.min(w, h);
     const fontSize = Math.min(Math.max(minDimension * 0.028, 30), 70);
 
+    // تشخیص فایرفاکس
+    const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
     ctx.save();
 
     ctx.font = `${fontSize}px Vazir`;
     ctx.textAlign = "center";
-    ctx.textBaseline = "middle"; // تغییر به middle برای مرکز دقیق
+
+    // فایرفاکس با middle مشکل دارد، از alphabetic استفاده می‌کنیم
+    ctx.textBaseline = isFirefox ? "alphabetic" : "middle";
+
     ctx.fillStyle = "#FFFFFF";
     ctx.shadowColor = "black";
-    ctx.shadowBlur = 8; // افزایش shadow برای خوانایی بهتر
+    ctx.shadowBlur = 8;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
@@ -302,7 +303,11 @@ async function addTextToCanvas(ctx, canvas, text) {
     const centerX = w / 2;
     const boxBottom = h - padding;
     const boxTop = boxBottom - textHeight - padding * 2;
-    const textY = (boxTop + boxBottom) / 2; // مرکز جعبه = موقعیت متن
+
+    // محاسبه textY بر اساس مرورگر
+    const textY = isFirefox
+        ? boxBottom - padding - textHeight * 0.25  // برای فایرفاکس با alphabetic
+        : (boxTop + boxBottom) / 2;                 // برای بقیه با middle
 
     const rectLeft  = centerX - textWidth / 2 - padding;
     const rectRight = centerX + textWidth / 2 + padding;
