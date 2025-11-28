@@ -1,16 +1,16 @@
 // نام کش – هر بار تغییر مهم دادی، نسخه را عوض کن
-const CACHE_NAME = "persian-date-stamper-v2";
+const CACHE_NAME = "persian-date-stamper-v3";
 
 // فایل‌هایی که باید کش شوند
 const ASSETS = [
-    "/",
-    "/index.html",
-    "/style.css",
-    "/app.js",
-    "/manifest.json",
-    "/assets/icon-192.png",
-    "/assets/icon-512.png",
-    "/assets/fonts/vazir.ttf"
+    "./",
+    "./index.html",
+    "./style.css",
+    "./app.js",
+    "./manifest.json",
+    "./assets/icon-192.png",
+    "./assets/icon-512.png",
+    "./assets/fonts/vazir.ttf"
 ];
 
 // نصب Service Worker و کش اولیه
