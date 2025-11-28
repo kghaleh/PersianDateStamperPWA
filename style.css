@@ -9,10 +9,14 @@
     box-sizing: border-box;
 }
 
+/* ============================================
+   طرح رنگی 1: Modern Blue (آبی مدرن)
+   ============================================ */
+
 html, body {
     margin: 0;
     padding: 0;
-    background: #121212;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #ffffff;
     font-family: "Vazir", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     height: 100%;
@@ -33,17 +37,20 @@ html, body {
 /* عنوان */
 .title {
     width: 100%;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
-    color: #BB86FC;
+    color: #ffffff;
     margin: 0 0 16px 0;
     text-align: right;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 /* پیش‌نمایش عکس */
 .image-container {
     flex: 1;
-    background: #1F1F1F;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     position: relative;
     margin-bottom: 24px;
     display: flex;
@@ -51,8 +58,9 @@ html, body {
     justify-content: center;
     min-height: 320px;
     max-height: 70vh;
-    border-radius: 12px;
+    border-radius: 20px;
     overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
 .image-preview {
@@ -61,11 +69,11 @@ html, body {
     width: auto;
     height: auto;
     object-fit: contain;
-    display: none; /* تا وقتی عکس نیومده */
+    display: none;
 }
 
 .placeholder {
-    color: #888;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
     text-align: center;
     padding: 0 12px;
@@ -74,47 +82,47 @@ html, body {
 /* دکمه‌های اصلی */
 .btn {
     border: none;
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 15px;
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 16px;
     color: #ffffff;
     cursor: pointer;
     font-family: "Vazir", sans-serif;
-    transition: background-color 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.1s ease,
-    opacity 0.1s ease;
-    width: 100%;              /* هر دو دکمه تمام عرض */
+    transition: all 0.3s ease;
+    width: 100%;
     margin-bottom: 12px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .btn:active {
-    transform: scale(0.97);
-    opacity: 0.9;
+    transform: translateY(2px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
 .btn:disabled {
-    opacity: 0.4;
+    opacity: 0.5;
     cursor: default;
 }
 
-/* دکمهٔ دوربین (آبی) */
+/* دکمهٔ دوربین */
 .btn-camera {
-    background-color: #007BFF;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .btn-camera:hover:not(:disabled) {
-    background-color: #0066d6;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-/* دکمهٔ اشتراک‌گذاری (صورتی/قرمز) */
+/* دکمهٔ اشتراک‌گذاری */
 .btn-share {
-    background: #CF6679;
-    font-size: 16px;
-    padding: 16px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.btn-share:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
 }
 
 /* امضای پایین */
@@ -122,7 +130,7 @@ html, body {
     width: 100%;
     text-align: center;
     font-size: 12px;
-    color: #B0B0B0;
+    color: rgba(255, 255, 255, 0.6);
     margin-top: 8px;
 }
 
