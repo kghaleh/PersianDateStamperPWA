@@ -104,12 +104,27 @@ html, body {
 
 .btn-camera {
     flex: 2;
+
+    background-color: #007BFF;        /* آبی پررنگ */
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 
-/* این رنگ‌ها را بر اساس button_camera / button_gallery خودت می‌تونی دقیق‌تر کنی */
-.btn-camera {
-    background: #03DAC6;
+.btn-camera:hover {
+    background-color: #0066d6;        /* کمی تیره‌تر روی hover */
+    box-shadow: 0 6px 14px rgba(0,0,0,0.45);
 }
+
+.btn-camera:active {
+    background-color: #005ccc;
+    transform: scale(0.97);
+}
+
 
 
 
