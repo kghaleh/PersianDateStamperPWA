@@ -4,11 +4,8 @@ const previewCtx = previewCanvas.getContext("2d");
 const placeholder = document.getElementById("placeholder");
 
 const btnCamera = document.getElementById("btnCamera");
-const btnGallery = document.getElementById("btnGallery");
 const btnShare = document.getElementById("btnShare");
-
 const inputCamera = document.getElementById("inputCamera");
-const inputGallery = document.getElementById("inputGallery");
 
 // canvas واقعی (فول‌سایز) برای پردازش و خروجی
 let realCanvas = null;
@@ -26,53 +23,22 @@ if ("serviceWorker" in navigator) {
 
 // ------------------ رویدادهای UI ------------------
 btnCamera.addEventListener("click", () => inputCamera.click());
-btnGallery.addEventListener("click", () => inputGallery.click());
-
 inputCamera.addEventListener("change", handleFileInput);
-inputGallery.addEventListener("change", handleFileInput);
-
 btnShare.addEventListener("click", handleShareOrDownload);
 
-// ------------------ مدیریت فایل انتخاب‌شده ------------------
+// ------------------ فقط عکس از دوربین، با تاریخ همین لحظه ------------------
 async function handleFileInput(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // تبدیل فایل به Image برای رسم
     const img = await fileToImage(file);
 
-    // سعی کن تاریخ را از EXIF بخوانی
-    const exifDate = await readExifDate(file);
+    // تاریخ همین لحظه (سیستم)
+    const now = new Date();
+    await drawAndProcessImage(img, now);
 
-    // پردازش تصویر + استمپ با استفاده از تاریخ EXIF (یا تاریخ سیستم)
-    await drawAndProcessImage(img, exifDate);
-}
-
-async function readExifDate(file) {
-    try {
-        if (typeof exifr === "undefined") {
-            // کتابخانه لود نشده
-            return null;
-        }
-
-        const exifData = await exifr.parse(file);
-        if (!exifData) return null;
-
-        const dt =
-            exifData.DateTimeOriginal ||
-            exifData.CreateDate ||
-            exifData.ModifyDate;
-
-        if (!dt) return null;
-
-        if (dt instanceof Date) return dt;
-
-        const parsed = new Date(dt);
-        return isNaN(parsed.getTime()) ? null : parsed;
-    } catch (err) {
-        console.error("EXIF parse error:", err);
-        return null;
-    }
+    // بعد از گرفتن یک عکس، input را ریست کن
+    e.target.value = "";
 }
 
 function fileToImage(file) {
@@ -89,7 +55,7 @@ function fileToImage(file) {
 }
 
 // ------------------ پردازش تصویر (فول‌سایز + preview) ------------------
-async function drawAndProcessImage(img, exifDate) {
+async function drawAndProcessImage(img, date) {
     // ۱) canvas واقعی فول‌سایز
     realCanvas = document.createElement("canvas");
     realCanvas.width = img.width;
@@ -102,9 +68,7 @@ async function drawAndProcessImage(img, exifDate) {
     // ۲) اعمال فیلترها روی فول‌سایز
     enhanceImage(realCtx, realCanvas.width, realCanvas.height);
 
-    // ۳) محاسبه تاریخ و متن (اولویت با EXIF، بعد تاریخ سیستم)
-    const date = exifDate || new Date();
-
+    // ۳) محاسبه تاریخ و متن (فقط تاریخ و ساعت فعلی)
     const persianDate = gregorianToPersian(date);
     const hour = date.getHours();
     const minute = date.getMinutes();
@@ -136,8 +100,7 @@ async function drawAndProcessImage(img, exifDate) {
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     previewCtx.drawImage(realCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
 
-    // ۶) خروجی نهایی برای share/download
-    currentImageCanvas = realCanvas; // همیشه فول‌رزولوشن
+    currentImageCanvas = realCanvas; // خروجی فول‌رزولوشن
     btnShare.disabled = false;
 }
 
@@ -311,14 +274,12 @@ async function addTextToCanvas(ctx, canvas, text) {
 
     const fontSize = Math.min(Math.max(minDimension * 0.04, 40), 120);
 
-    // تشخیص فایرفاکس
     const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
     ctx.save();
 
     ctx.font = `${fontSize}px Vazir`;
     ctx.textAlign = "center";
-
     ctx.textBaseline = isFirefox ? "alphabetic" : "middle";
 
     ctx.fillStyle = "#FFFFFF";
