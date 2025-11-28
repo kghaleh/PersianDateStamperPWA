@@ -302,8 +302,7 @@ async function addTextToCanvas(ctx, canvas, text) {
     const centerX = w / 2;
     const boxBottom = h - padding;
     const boxTop = boxBottom - textHeight - padding * 2;
-    const boxCenterY = (boxTop + boxBottom) / 2;
-    const textY = boxCenterY; // حالا که baseline=middle، مرکز جعبه همان موقعیت متن است
+    const textY = (boxTop + boxBottom) / 2; // مرکز جعبه = موقعیت متن
 
     const rectLeft  = centerX - textWidth / 2 - padding;
     const rectRight = centerX + textWidth / 2 + padding;
