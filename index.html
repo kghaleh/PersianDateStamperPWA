@@ -10,7 +10,7 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- iOS PWA meta (برای آیکون/تمام‌صفحه بودن) -->
+    <!-- iOS PWA meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
 </head>
@@ -18,7 +18,7 @@
 <div class="root">
 
     <!-- عنوان -->
-    <h1 id="tvTitle" class="title">
+    <h1 class="title">
         مهر تاریخ فارسی روی عکس
     </h1>
 
@@ -30,24 +30,18 @@
         </div>
     </div>
 
-    <!-- فقط دکمهٔ دوربین -->
-    <div class="row buttons-row">
-        <div class="spacer spacer-small"></div>
+    <!-- دکمهٔ عکس گرفتن -->
+    <button id="btnCamera" class="btn btn-camera">
+        عکس بگیر
+    </button>
 
-        <button id="btnCamera" class="btn btn-camera">
-            عکس بگیرید
-        </button>
-
-        <div class="spacer spacer-small"></div>
-    </div>
-
-    <!-- دکمه اشتراک‌گذاری -->
+    <!-- دکمه اشتراک‌گذاری / دانلود -->
     <button id="btnShare" class="btn btn-share" disabled>
         اشتراک‌گذاری / دانلود
     </button>
 
     <!-- امضای توسعه‌دهنده -->
-    <div id="tvDeveloper" class="developer">
+    <div class="developer">
         Developed by K. Ghaleh
     </div>
 

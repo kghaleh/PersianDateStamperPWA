@@ -37,7 +37,7 @@ async function handleFileInput(e) {
     const now = new Date();
     await drawAndProcessImage(img, now);
 
-    // بعد از گرفتن یک عکس، input را ریست کن
+    // پاک کردن مقدار input تا بتوان چند بار پشت‌سرهم عکس گرفت
     e.target.value = "";
 }
 
@@ -68,7 +68,7 @@ async function drawAndProcessImage(img, date) {
     // ۲) اعمال فیلترها روی فول‌سایز
     enhanceImage(realCtx, realCanvas.width, realCanvas.height);
 
-    // ۳) محاسبه تاریخ و متن (فقط تاریخ و ساعت فعلی)
+    // ۳) محاسبه تاریخ و متن
     const persianDate = gregorianToPersian(date);
     const hour = date.getHours();
     const minute = date.getMinutes();
@@ -85,7 +85,7 @@ async function drawAndProcessImage(img, date) {
     // ۵) ساخت preview برای نمایش در صفحه
     const container = previewCanvas.parentElement;
     const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
+    const containerHeight = container.clientHeight || 400;
 
     const scaleW = containerWidth / realCanvas.width;
     const scaleH = containerHeight / realCanvas.height;
@@ -341,7 +341,7 @@ function roundRect(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
-/* ------------------ Share / Download ------------------ */
+/* ------------------ پاک‌سازی کش بعد از Share/Download ------------------ */
 
 async function handleShareOrDownload() {
     if (!currentImageCanvas) return;
@@ -358,11 +358,19 @@ async function handleShareOrDownload() {
                     title: "Persian Date Photo",
                     text: ""
                 });
+
+                // عملیات موفق → کش را پاک کن
+                clearCacheNow();
+
             } catch (e) {
+                // اگر share شکست خورد، دانلود محلی
                 downloadBlob(blob, "persian-date-photo.jpg");
+                clearCacheNow();
             }
         } else {
+            // share در دسترس نیست → دانلود
             downloadBlob(blob, "persian-date-photo.jpg");
+            clearCacheNow();
         }
     }, "image/jpeg", 0.9);
 }
@@ -376,4 +384,10 @@ function downloadBlob(blob, filename) {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+}
+
+function clearCacheNow() {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage("clear_cache_now");
+    }
 }

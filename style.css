@@ -15,6 +15,7 @@ html, body {
     background: #121212;
     color: #ffffff;
     font-family: "Vazir", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    height: 100%;
 }
 
 .body, .root {
@@ -48,8 +49,10 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 400px;
+    min-height: 320px;
     max-height: 70vh;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .image-preview {
@@ -64,37 +67,25 @@ html, body {
 .placeholder {
     color: #888;
     font-size: 14px;
+    text-align: center;
+    padding: 0 12px;
 }
 
-/* ردیف دکمه‌ها */
-.row.buttons-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.spacer {
-    height: 1px;
-}
-
-.spacer-small {
-    flex: 0.5;
-}
-
-.spacer-big {
-    flex: 1;
-}
-
-/* دکمه‌ها */
+/* دکمه‌های اصلی */
 .btn {
     border: none;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 14px;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 15px;
     color: #ffffff;
     cursor: pointer;
     font-family: "Vazir", sans-serif;
-    transition: transform 0.1s ease, opacity 0.1s ease;
+    transition: background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease,
+    opacity 0.1s ease;
+    width: 100%;              /* هر دو دکمه تمام عرض */
+    margin-bottom: 12px;
 }
 
 .btn:active {
@@ -102,44 +93,28 @@ html, body {
     opacity: 0.9;
 }
 
-.btn-camera {
-    flex: 2;
-
-    background-color: #007BFF;        /* آبی پررنگ */
-    color: #ffffff;
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 15px;
-    font-weight: 600;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
-}
-
-.btn-camera:hover {
-    background-color: #0066d6;        /* کمی تیره‌تر روی hover */
-    box-shadow: 0 6px 14px rgba(0,0,0,0.45);
-}
-
-.btn-camera:active {
-    background-color: #005ccc;
-    transform: scale(0.97);
-}
-
-
-
-
-/* دکمه Share */
-.btn-share {
-    background: #CF6679; /* شبیه button_share */
-    width: 100%;
-    padding: 16px;
-    font-size: 16px;
-    margin-bottom: 16px;
-}
-
 .btn:disabled {
     opacity: 0.4;
     cursor: default;
+}
+
+/* دکمهٔ دوربین (آبی) */
+.btn-camera {
+    background-color: #007BFF;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    font-weight: 600;
+}
+
+.btn-camera:hover:not(:disabled) {
+    background-color: #0066d6;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+}
+
+/* دکمهٔ اشتراک‌گذاری (صورتی/قرمز) */
+.btn-share {
+    background: #CF6679;
+    font-size: 16px;
+    padding: 16px;
 }
 
 /* امضای پایین */
@@ -148,9 +123,10 @@ html, body {
     text-align: center;
     font-size: 12px;
     color: #B0B0B0;
+    margin-top: 8px;
 }
 
-/* inputهای مخفی */
+/* input مخفی */
 .hidden-input {
     display: none;
 }
