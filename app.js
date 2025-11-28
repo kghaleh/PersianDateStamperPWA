@@ -38,8 +38,41 @@ async function handleFileInput(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    // تبدیل فایل به Image برای رسم
     const img = await fileToImage(file);
-    await drawAndProcessImage(img);
+
+    // سعی کن تاریخ را از EXIF بخوانی
+    const exifDate = await readExifDate(file);
+
+    // پردازش تصویر + استمپ با استفاده از تاریخ EXIF (یا تاریخ سیستم)
+    await drawAndProcessImage(img, exifDate);
+}
+
+async function readExifDate(file) {
+    try {
+        if (typeof exifr === "undefined") {
+            // کتابخانه لود نشده
+            return null;
+        }
+
+        const exifData = await exifr.parse(file);
+        if (!exifData) return null;
+
+        const dt =
+            exifData.DateTimeOriginal ||
+            exifData.CreateDate ||
+            exifData.ModifyDate;
+
+        if (!dt) return null;
+
+        if (dt instanceof Date) return dt;
+
+        const parsed = new Date(dt);
+        return isNaN(parsed.getTime()) ? null : parsed;
+    } catch (err) {
+        console.error("EXIF parse error:", err);
+        return null;
+    }
 }
 
 function fileToImage(file) {
@@ -56,7 +89,7 @@ function fileToImage(file) {
 }
 
 // ------------------ پردازش تصویر (فول‌سایز + preview) ------------------
-async function drawAndProcessImage(img) {
+async function drawAndProcessImage(img, exifDate) {
     // ۱) canvas واقعی فول‌سایز
     realCanvas = document.createElement("canvas");
     realCanvas.width = img.width;
@@ -69,14 +102,15 @@ async function drawAndProcessImage(img) {
     // ۲) اعمال فیلترها روی فول‌سایز
     enhanceImage(realCtx, realCanvas.width, realCanvas.height);
 
-    // ۳) محاسبه تاریخ و متن
-    const now = new Date();
-    const persianDate = gregorianToPersian(now);
-    const hour = now.getHours();
-    const minute = now.getMinutes();
+    // ۳) محاسبه تاریخ و متن (اولویت با EXIF، بعد تاریخ سیستم)
+    const date = exifDate || new Date();
+
+    const persianDate = gregorianToPersian(date);
+    const hour = date.getHours();
+    const minute = date.getMinutes();
     const timeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
-    const weekdayFa = persianWeekDays[now.getDay()];
+    const weekdayFa = persianWeekDays[date.getDay()];
     const dateText = `${persianDate.year}/${persianDate.month}/${persianDate.day}`;
     const fullText = `${weekdayFa}  ${dateText}  ${timeStr}`;
     const fullTextFarsi = convertToFarsiDigits(fullText);
@@ -89,7 +123,6 @@ async function drawAndProcessImage(img) {
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
 
-    // محاسبه مقیاس برای fit شدن در container
     const scaleW = containerWidth / realCanvas.width;
     const scaleH = containerHeight / realCanvas.height;
     const scale = Math.min(scaleW, scaleH, 1); // حداکثر 1 (بدون بزرگنمایی)
@@ -100,7 +133,6 @@ async function drawAndProcessImage(img) {
     placeholder.style.display = "none";
     previewCanvas.style.display = "block";
 
-    // کوچک کردن تصویر فول‌سایز روی canvas پیش‌نمایش
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     previewCtx.drawImage(realCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
 
@@ -287,7 +319,6 @@ async function addTextToCanvas(ctx, canvas, text) {
     ctx.font = `${fontSize}px Vazir`;
     ctx.textAlign = "center";
 
-    // فایرفاکس با middle مشکل دارد، از alphabetic استفاده می‌کنیم
     ctx.textBaseline = isFirefox ? "alphabetic" : "middle";
 
     ctx.fillStyle = "#FFFFFF";
@@ -305,10 +336,9 @@ async function addTextToCanvas(ctx, canvas, text) {
     const boxBottom = h - padding;
     const boxTop = boxBottom - textHeight - padding * 2;
 
-    // محاسبه textY بر اساس مرورگر
     const textY = isFirefox
-        ? boxBottom - padding - textHeight * 0.25  // برای فایرفاکس با alphabetic
-        : (boxTop + boxBottom) / 2;                 // برای بقیه با middle
+        ? boxBottom - padding - textHeight * 0.25
+        : (boxTop + boxBottom) / 2;
 
     const rectLeft  = centerX - textWidth / 2 - padding;
     const rectRight = centerX + textWidth / 2 + padding;
@@ -325,7 +355,6 @@ async function addTextToCanvas(ctx, canvas, text) {
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     ctx.stroke();
 
-    // رسم متن با shadow قوی‌تر
     ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
     ctx.shadowBlur = 8;
     ctx.shadowOffsetX = 0;
@@ -356,7 +385,6 @@ function roundRect(ctx, x, y, w, h, r) {
 async function handleShareOrDownload() {
     if (!currentImageCanvas) return;
 
-    // تغییر به JPEG با کیفیت 90% برای کاهش حجم
     currentImageCanvas.toBlob(async blob => {
         if (!blob) return;
 
@@ -375,7 +403,7 @@ async function handleShareOrDownload() {
         } else {
             downloadBlob(blob, "persian-date-photo.jpg");
         }
-    }, "image/jpeg", 0.9); // JPEG با کیفیت 90%
+    }, "image/jpeg", 0.9);
 }
 
 function downloadBlob(blob, filename) {
