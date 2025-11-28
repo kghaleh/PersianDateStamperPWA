@@ -276,7 +276,8 @@ async function addTextToCanvas(ctx, canvas, text) {
     const w = canvas.width;
     const h = canvas.height;
     const minDimension = Math.min(w, h);
-    const fontSize = Math.min(Math.max(minDimension * 0.028, 30), 70);
+
+    const fontSize = Math.min(Math.max(minDimension * 0.04, 40), 120);
 
     // تشخیص فایرفاکس
     const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
