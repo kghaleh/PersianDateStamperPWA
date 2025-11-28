@@ -1,0 +1,143 @@
+@font-face {
+    font-family: "Vazir";
+    src: url("assets/fonts/vazir.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #121212;
+    color: #ffffff;
+    font-family: "Vazir", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.body, .root {
+    height: 100%;
+}
+
+.root {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* عنوان */
+.title {
+    width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    color: #BB86FC;
+    margin: 0 0 16px 0;
+    text-align: right;
+}
+
+/* پیش‌نمایش عکس */
+.image-container {
+    flex: 1;
+    background: #1F1F1F;
+    position: relative;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    max-height: 70vh;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: none; /* تا وقتی عکس نیومده */
+}
+
+.placeholder {
+    color: #888;
+    font-size: 14px;
+}
+
+/* ردیف دکمه‌ها */
+.row.buttons-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.spacer {
+    height: 1px;
+}
+
+.spacer-small {
+    flex: 0.5;
+}
+
+.spacer-big {
+    flex: 1;
+}
+
+/* دکمه‌ها */
+.btn {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: "Vazir", sans-serif;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.btn:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+}
+
+.btn-camera, .btn-gallery {
+    flex: 2;
+}
+
+/* این رنگ‌ها را بر اساس button_camera / button_gallery خودت می‌تونی دقیق‌تر کنی */
+.btn-camera {
+    background: #03DAC6;
+}
+
+.btn-gallery {
+    background: #BB86FC;
+}
+
+/* دکمه Share */
+.btn-share {
+    background: #CF6679; /* شبیه button_share */
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* امضای پایین */
+.developer {
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: #B0B0B0;
+}
+
+/* inputهای مخفی */
+.hidden-input {
+    display: none;
+}

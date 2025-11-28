@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مُهر تاریخ فارسی روی عکس</title> <!-- متن رو اگر چیز دیگه‌ای داشتی عوض کن -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- iOS PWA meta (برای آیکون/تمام‌صفحه بودن) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+</head>
+<body>
+<div class="root">
+
+    <!-- عنوان -->
+    <h1 id="tvTitle" class="title">
+        مهر تاریخ فارسی روی عکس
+        <!-- اگر متن دیگری در @string/app_title داشتی اینجا جایگزین کن -->
+    </h1>
+
+    <!-- پیش‌نمایش عکس -->
+    <div class="image-container">
+        <canvas id="canvas" class="image-preview"></canvas>
+        <div id="placeholder" class="placeholder">
+            هنوز عکسی انتخاب نشده
+        </div>
+    </div>
+
+    <!-- دکمه‌های دوربین و گالری -->
+    <div class="row buttons-row">
+        <!-- فضای خالی سمت راست معادل Space -->
+        <div class="spacer spacer-small"></div>
+
+        <button id="btnCamera" class="btn btn-camera">
+            دوربین
+        </button>
+
+        <div class="spacer spacer-big"></div>
+
+        <button id="btnGallery" class="btn btn-gallery">
+            گالری
+        </button>
+
+        <div class="spacer spacer-small"></div>
+    </div>
+
+    <!-- دکمه اشتراک‌گذاری -->
+    <button id="btnShare" class="btn btn-share" disabled>
+        اشتراک‌گذاری / دانلود
+    </button>
+
+    <!-- امضای توسعه‌دهنده -->
+    <div id="tvDeveloper" class="developer">
+        Developed by K. Ghaleh
+        <!-- اگر تو @string/developer متن دیگری داشتی اینجا جایگزین کن -->
+    </div>
+
+    <!-- inputهای مخفی برای دوربین و گالری -->
+    <input type="file" accept="image/*" capture="environment" id="inputCamera" class="hidden-input">
+    <input type="file" accept="image/*" id="inputGallery" class="hidden-input">
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
