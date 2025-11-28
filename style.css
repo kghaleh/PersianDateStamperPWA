@@ -10,13 +10,13 @@
 }
 
 /* ============================================
-   طرح رنگی 1: Modern Blue (آبی مدرن)
+   طرح رنگی 4: Professional Dark (تیره حرفه‌ای)
    ============================================ */
 
 html, body {
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: #ffffff;
     font-family: "Vazir", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     height: 100%;
@@ -39,18 +39,18 @@ html, body {
     width: 100%;
     font-size: 22px;
     font-weight: bold;
-    color: #ffffff;
+    color: #4fc3f7;
     margin: 0 0 16px 0;
     text-align: right;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 10px rgba(79, 195, 247, 0.3);
 }
 
 /* پیش‌نمایش عکس */
 .image-container {
     flex: 1;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(79, 195, 247, 0.2);
     position: relative;
     margin-bottom: 24px;
     display: flex;
@@ -58,9 +58,9 @@ html, body {
     justify-content: center;
     min-height: 320px;
     max-height: 70vh;
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 
 .image-preview {
@@ -73,7 +73,7 @@ html, body {
 }
 
 .placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 14px;
     text-align: center;
     padding: 0 12px;
@@ -82,7 +82,7 @@ html, body {
 /* دکمه‌های اصلی */
 .btn {
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 16px 20px;
     font-size: 16px;
     color: #ffffff;
@@ -92,7 +92,7 @@ html, body {
     width: 100%;
     margin-bottom: 12px;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 .btn:active {
@@ -101,28 +101,31 @@ html, body {
 }
 
 .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: default;
 }
 
 /* دکمهٔ دوربین */
 .btn-camera {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4fc3f7 0%, #2196f3 100%);
+    color: #000000;
+    font-weight: 700;
 }
 
 .btn-camera:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
 }
 
 /* دکمهٔ اشتراک‌گذاری */
 .btn-share {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #29b6f6 0%, #1976d2 100%);
+    color: #ffffff;
 }
 
 .btn-share:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+    box-shadow: 0 6px 20px rgba(41, 182, 246, 0.4);
 }
 
 /* امضای پایین */
@@ -130,7 +133,7 @@ html, body {
     width: 100%;
     text-align: center;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(79, 195, 247, 0.6);
     margin-top: 8px;
 }
 
