@@ -166,7 +166,7 @@ function gregorianToPersian(date) {
 
 /* ------------------ فیلترها: Dehaze + Clarity + Saturation ------------------ */
 
-function enhanceImage(ctx, width, height, dehazeStrength = 0.20, clarityStrength = 0.3, saturationBoost = 1.05) {
+function enhanceImage(ctx, width, height, dehazeStrength = 0.18, clarityStrength = 0.3, saturationBoost = 1.03) {
     applyDehaze(ctx, width, height, dehazeStrength);
 
     if (clarityStrength > 0) {
