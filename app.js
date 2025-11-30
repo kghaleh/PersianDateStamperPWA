@@ -21,6 +21,58 @@ if ("serviceWorker" in navigator) {
     });
 }
 
+// ------------------ Handle Share Target (دریافت عکس از گالری) ------------------
+window.addEventListener("load", async () => {
+    const url = new URL(window.location.href);
+    
+    // اگر از طریق share target باز شده
+    if (url.pathname === '/share-target' || url.searchParams.has('share-target')) {
+        try {
+            const formData = await getFormData();
+            if (formData && formData.has('image')) {
+                const imageFile = formData.get('image');
+                if (imageFile && imageFile.size > 0) {
+                    const img = await fileToImage(imageFile);
+                    const now = new Date();
+                    await drawAndProcessImage(img, now);
+                    
+                    // پاک کردن URL برای جلوگیری از پردازش مجدد
+                    window.history.replaceState({}, document.title, '/');
+                }
+            }
+        } catch (e) {
+            console.error("Error handling shared image:", e);
+        }
+    }
+});
+
+// دریافت FormData از Service Worker
+async function getFormData() {
+    return new Promise((resolve) => {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            const messageChannel = new MessageChannel();
+            
+            messageChannel.port1.onmessage = (event) => {
+                if (event.data && event.data.formData) {
+                    resolve(event.data.formData);
+                } else {
+                    resolve(null);
+                }
+            };
+            
+            navigator.serviceWorker.controller.postMessage(
+                { type: 'get-share-data' },
+                [messageChannel.port2]
+            );
+            
+            // timeout برای جلوگیری از انتظار بی‌نهایت
+            setTimeout(() => resolve(null), 3000);
+        } else {
+            resolve(null);
+        }
+    });
+}
+
 // ------------------ رویدادهای UI ------------------
 btnCamera.addEventListener("click", () => inputCamera.click());
 inputCamera.addEventListener("change", handleFileInput);
