@@ -21,78 +21,6 @@ if ("serviceWorker" in navigator) {
     });
 }
 
-// ------------------ Handle Share Target (دریافت عکس از گالری) ------------------
-window.addEventListener("load", async () => {
-    // Check for File Handling API (Android Chrome)
-    if ('launchQueue' in window) {
-        window.launchQueue.setConsumer(async (launchParams) => {
-            if (launchParams.files && launchParams.files.length > 0) {
-                try {
-                    const fileHandle = launchParams.files[0];
-                    const file = await fileHandle.getFile();
-                    
-                    if (file.type.startsWith('image/')) {
-                        const img = await fileToImage(file);
-                        const now = new Date();
-                        await drawAndProcessImage(img, now);
-                    }
-                } catch (e) {
-                    console.error("Error handling file:", e);
-                }
-            }
-        });
-    }
-    
-    const url = new URL(window.location.href);
-    
-    // اگر از طریق share target باز شده
-    if (url.pathname === '/share-target' || url.searchParams.has('share-target')) {
-        try {
-            const formData = await getFormData();
-            if (formData && formData.has('image')) {
-                const imageFile = formData.get('image');
-                if (imageFile && imageFile.size > 0) {
-                    const img = await fileToImage(imageFile);
-                    const now = new Date();
-                    await drawAndProcessImage(img, now);
-                    
-                    // پاک کردن URL برای جلوگیری از پردازش مجدد
-                    window.history.replaceState({}, document.title, '/');
-                }
-            }
-        } catch (e) {
-            console.error("Error handling shared image:", e);
-        }
-    }
-});
-
-// دریافت FormData از Service Worker
-async function getFormData() {
-    return new Promise((resolve) => {
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            const messageChannel = new MessageChannel();
-            
-            messageChannel.port1.onmessage = (event) => {
-                if (event.data && event.data.formData) {
-                    resolve(event.data.formData);
-                } else {
-                    resolve(null);
-                }
-            };
-            
-            navigator.serviceWorker.controller.postMessage(
-                { type: 'get-share-data' },
-                [messageChannel.port2]
-            );
-            
-            // timeout برای جلوگیری از انتظار بی‌نهایت
-            setTimeout(() => resolve(null), 3000);
-        } else {
-            resolve(null);
-        }
-    });
-}
-
 // ------------------ رویدادهای UI ------------------
 btnCamera.addEventListener("click", () => inputCamera.click());
 inputCamera.addEventListener("change", handleFileInput);
@@ -422,10 +350,7 @@ async function handleShareOrDownload() {
         if (!blob) return;
 
         const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isAndroid = /android/i.test(navigator.userAgent);
 
-        // اولویت ۱: Web Share API (برای iOS و Android)
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
                 await navigator.share({
@@ -433,55 +358,19 @@ async function handleShareOrDownload() {
                     title: "Persian Date Photo",
                     text: ""
                 });
-                clearCacheNow();
-                return;
-            } catch (e) {
-                console.log("Share failed:", e);
-                // اگر iOS بود و share لغو شد، هیچ کاری نکن (دانلود نکن)
-                if (isIOS) {
-                    return;
-                }
-            }
-        } else if (isIOS) {
-            // iOS ولی Share API موجود نیست - فقط پیام بده
-            alert("⚠️ لطفاً از Safari استفاده کنید تا بتوانید عکس را Share کنید");
-            return;
-        }
 
-        // اولویت ۲: File System Access API برای ذخیره در گالری (Android Chrome)
-        if (window.showSaveFilePicker && isAndroid) {
-            try {
-                const suggestedName = `persian-date-${Date.now()}.jpg`;
-                const handle = await window.showSaveFilePicker({
-                    suggestedName: suggestedName,
-                    types: [{
-                        description: 'JPEG Image',
-                        accept: { 'image/jpeg': ['.jpg', '.jpeg'] }
-                    }]
-                });
-                
-                const writable = await handle.createWritable();
-                await writable.write(blob);
-                await writable.close();
-                
+                // عملیات موفق → کش را پاک کن
                 clearCacheNow();
-                alert("✓ تصویر با موفقیت ذخیره شد");
-                return;
-            } catch (e) {
-                if (e.name !== 'AbortError') {
-                    console.log("Save picker failed:", e);
-                }
-            }
-        }
 
-        // اولویت ۳: دانلود مستقیم (فقط برای Android)
-        if (isAndroid) {
-            downloadBlob(blob, `persian-date-${Date.now()}.jpg`);
+            } catch (e) {
+                // اگر share شکست خورد، دانلود محلی
+                downloadBlob(blob, "persian-date-photo.jpg");
+                clearCacheNow();
+            }
+        } else {
+            // share در دسترس نیست → دانلود
+            downloadBlob(blob, "persian-date-photo.jpg");
             clearCacheNow();
-            
-            setTimeout(() => {
-                alert("💡 برای ذخیره در گالری:\n۱. فایل دانلود شد\n۲. از منوی دانلودها تصویر را باز کنید\n۳. گزینه 'Save to Gallery' را انتخاب کنید");
-            }, 500);
         }
     }, "image/jpeg", 0.9);
 }
