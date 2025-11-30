@@ -1,150 +1,217 @@
-@font-face {
-    font-family: "Vazir";
-    src: url("assets/fonts/vazir.ttf") format("truetype");
-    font-weight: normal;
-    font-style: normal;
-}
-
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-/* ============================================
-   طرح رنگی: Modern Blue Dark (آبی مدرن تیره)
-   ============================================ */
-
 html, body {
-    margin: 0;
-    padding: 0;
-    /* پس‌زمینه تیره‌تر */
-    background: linear-gradient(135deg, #2d3561 0%, #3d1e6d 100%);
-    color: #ffffff;
-    font-family: "Vazir", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    width: 100%;
     height: 100%;
+    overflow: hidden;
+    position: fixed;
+    overscroll-behavior: none;
 }
 
-.body, .root {
-    height: 100%;
+body {
+    font-family: "Vazir", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #121212;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* پشتیبانی از Safe Area (iPhone X و بالاتر) */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 .root {
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+    padding: clamp(10px, 2vh, 20px);
     display: flex;
     flex-direction: column;
-    padding: 16px;
-    max-width: 600px;
-    margin: 0 auto;
+    gap: clamp(8px, 1.5vh, 16px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* عنوان - سفید واضح */
 .title {
-    width: 100%;
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0 0 16px 0;
-    text-align: right;
-    text-shadow: 0 2px 15px rgba(0,0,0,0.5);
-    letter-spacing: -0.5px;
+    font-size: clamp(18px, 4vw, 24px);
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: clamp(5px, 1vh, 10px);
+    flex-shrink: 0;
 }
 
-/* پیش‌نمایش عکس */
 .image-container {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(15px);
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
     position: relative;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 320px;
-    max-height: 70vh;
-    border-radius: 20px;
+    width: 100%;
+    flex: 1;
+    min-height: 200px;
+    background: #1e1e1e;
+    border-radius: clamp(8px, 2vw, 12px);
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-container > * {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .image-preview {
     max-width: 100%;
     max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
     display: none;
+    object-fit: contain;
 }
 
-/* Placeholder - سفید روشن */
 .placeholder {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 15px;
+    font-size: clamp(14px, 3vw, 18px);
+    color: #888;
     text-align: center;
-    padding: 0 12px;
-    font-weight: 500;
+    padding: clamp(10px, 3vw, 20px);
 }
 
-/* دکمه‌های اصلی */
-.btn {
-    border: none;
-    border-radius: 12px;
-    padding: 17px 20px;
-    font-size: 17px;
-    color: #ffffff;
-    cursor: pointer;
-    font-family: "Vazir", sans-serif;
-    transition: all 0.3s ease;
+/* ردیف دکمه‌ها */
+.button-row {
+    display: flex;
+    gap: clamp(6px, 1.5vw, 12px);
     width: 100%;
-    margin-bottom: 12px;
-    font-weight: 700;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    letter-spacing: -0.3px;
+    flex-shrink: 0;
+}
+
+.button-row .btn {
+    flex: 1;
+}
+
+.btn {
+    padding: clamp(12px, 2.5vh, 16px) clamp(16px, 3vw, 24px);
+    font-size: clamp(13px, 2.8vw, 16px);
+    font-weight: bold;
+    border: none;
+    border-radius: clamp(8px, 2vw, 12px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    width: 100%;
+    white-space: nowrap;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    transform: scale(0.95);
 }
 
 .btn:disabled {
     opacity: 0.5;
-    cursor: default;
+    cursor: not-allowed;
 }
 
-/* دکمهٔ دوربین - روشن‌تر */
 .btn-camera {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-camera:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-    background: linear-gradient(135deg, #7a8eee 0%, #8a5bb5 100%);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
-/* دکمهٔ اشتراک‌گذاری - روشن‌تر */
-.btn-share {
+.btn-gallery {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+}
+
+.btn-gallery:hover:not(:disabled) {
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+}
+
+.btn-share {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
 .btn-share:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(245, 87, 108, 0.5);
-    background: linear-gradient(135deg, #f5a3ff 0%, #ff6680 100%);
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
 }
 
-/* امضای پایین - سفید کمرنگ */
 .developer {
-    width: 100%;
     text-align: center;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    margin-top: 8px;
-    font-weight: 400;
+    font-size: clamp(10px, 2vw, 12px);
+    color: #666;
+    margin-top: auto;
+    flex-shrink: 0;
+    padding-top: clamp(5px, 1vh, 10px);
 }
 
-/* input مخفی */
 .hidden-input {
     display: none;
+}
+
+/* Responsive برای موبایل‌های کوچک */
+@media (max-height: 600px) {
+    .root {
+        gap: clamp(6px, 1vh, 10px);
+    }
+    
+    .title {
+        font-size: clamp(16px, 3.5vw, 20px);
+        margin-bottom: 5px;
+    }
+    
+    .image-container {
+        min-height: 180px;
+    }
+    
+    .btn {
+        padding: clamp(10px, 2vh, 12px) clamp(12px, 2.5vw, 16px);
+        font-size: clamp(12px, 2.5vw, 14px);
+    }
+}
+
+/* Responsive برای صفحه‌های بسیار کوچک */
+@media (max-width: 360px) {
+    .btn {
+        font-size: 12px;
+        padding: 10px 12px;
+    }
+    
+    .title {
+        font-size: 16px;
+    }
+    
+    .image-container {
+        min-height: 150px;
+    }
+}
+
+/* Responsive برای تبلت و بالاتر */
+@media (min-width: 768px) {
+    .root {
+        max-width: 500px;
+    }
+}
+
+/* تنظیمات خاص برای iPhone با notch */
+@supports (padding: max(0px)) {
+    body {
+        padding-top: max(env(safe-area-inset-top), 10px);
+        padding-bottom: max(env(safe-area-inset-bottom), 10px);
+    }
+}
+
+/* Landscape mode */
+@media (orientation: landscape) {
+    .image-container {
+        min-height: 50vh;
+    }
+    
+    .root {
+        gap: clamp(6px, 1vh, 12px);
+    }
 }
