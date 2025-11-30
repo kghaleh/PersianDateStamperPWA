@@ -23,6 +23,26 @@ if ("serviceWorker" in navigator) {
 
 // ------------------ Handle Share Target (دریافت عکس از گالری) ------------------
 window.addEventListener("load", async () => {
+    // Check for File Handling API (Android Chrome)
+    if ('launchQueue' in window) {
+        window.launchQueue.setConsumer(async (launchParams) => {
+            if (launchParams.files && launchParams.files.length > 0) {
+                try {
+                    const fileHandle = launchParams.files[0];
+                    const file = await fileHandle.getFile();
+                    
+                    if (file.type.startsWith('image/')) {
+                        const img = await fileToImage(file);
+                        const now = new Date();
+                        await drawAndProcessImage(img, now);
+                    }
+                } catch (e) {
+                    console.error("Error handling file:", e);
+                }
+            }
+        });
+    }
+    
     const url = new URL(window.location.href);
     
     // اگر از طریق share target باز شده
@@ -402,6 +422,8 @@ async function handleShareOrDownload() {
         if (!blob) return;
 
         const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isAndroid = /android/i.test(navigator.userAgent);
 
         // اولویت ۱: Web Share API (برای iOS و Android)
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -414,12 +436,20 @@ async function handleShareOrDownload() {
                 clearCacheNow();
                 return;
             } catch (e) {
-                console.log("Share failed, trying save to gallery:", e);
+                console.log("Share failed:", e);
+                // اگر iOS بود و share لغو شد، هیچ کاری نکن (دانلود نکن)
+                if (isIOS) {
+                    return;
+                }
             }
+        } else if (isIOS) {
+            // iOS ولی Share API موجود نیست - فقط پیام بده
+            alert("⚠️ لطفاً از Safari استفاده کنید تا بتوانید عکس را Share کنید");
+            return;
         }
 
         // اولویت ۲: File System Access API برای ذخیره در گالری (Android Chrome)
-        if (window.showSaveFilePicker) {
+        if (window.showSaveFilePicker && isAndroid) {
             try {
                 const suggestedName = `persian-date-${Date.now()}.jpg`;
                 const handle = await window.showSaveFilePicker({
@@ -444,12 +474,11 @@ async function handleShareOrDownload() {
             }
         }
 
-        // اولویت ۳: دانلود مستقیم (fallback)
-        downloadBlob(blob, `persian-date-${Date.now()}.jpg`);
-        clearCacheNow();
-        
-        // راهنمایی برای کاربر Android
-        if (/android/i.test(navigator.userAgent)) {
+        // اولویت ۳: دانلود مستقیم (فقط برای Android)
+        if (isAndroid) {
+            downloadBlob(blob, `persian-date-${Date.now()}.jpg`);
+            clearCacheNow();
+            
             setTimeout(() => {
                 alert("💡 برای ذخیره در گالری:\n۱. فایل دانلود شد\n۲. از منوی دانلودها تصویر را باز کنید\n۳. گزینه 'Save to Gallery' را انتخاب کنید");
             }, 500);
