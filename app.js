@@ -351,6 +351,7 @@ async function handleShareOrDownload() {
 
         const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
 
+        // اولویت ۱: Web Share API (برای iOS و Android)
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
                 await navigator.share({
@@ -358,19 +359,48 @@ async function handleShareOrDownload() {
                     title: "Persian Date Photo",
                     text: ""
                 });
-
-                // عملیات موفق → کش را پاک کن
                 clearCacheNow();
-
+                return;
             } catch (e) {
-                // اگر share شکست خورد، دانلود محلی
-                downloadBlob(blob, "persian-date-photo.jpg");
-                clearCacheNow();
+                console.log("Share failed, trying save to gallery:", e);
             }
-        } else {
-            // share در دسترس نیست → دانلود
-            downloadBlob(blob, "persian-date-photo.jpg");
-            clearCacheNow();
+        }
+
+        // اولویت ۲: File System Access API برای ذخیره در گالری (Android Chrome)
+        if (window.showSaveFilePicker) {
+            try {
+                const suggestedName = `persian-date-${Date.now()}.jpg`;
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: suggestedName,
+                    types: [{
+                        description: 'JPEG Image',
+                        accept: { 'image/jpeg': ['.jpg', '.jpeg'] }
+                    }]
+                });
+                
+                const writable = await handle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                
+                clearCacheNow();
+                alert("✓ تصویر با موفقیت ذخیره شد");
+                return;
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    console.log("Save picker failed:", e);
+                }
+            }
+        }
+
+        // اولویت ۳: دانلود مستقیم (fallback)
+        downloadBlob(blob, `persian-date-${Date.now()}.jpg`);
+        clearCacheNow();
+        
+        // راهنمایی برای کاربر Android
+        if (/android/i.test(navigator.userAgent)) {
+            setTimeout(() => {
+                alert("💡 برای ذخیره در گالری:\n۱. فایل دانلود شد\n۲. از منوی دانلودها تصویر را باز کنید\n۳. گزینه 'Save to Gallery' را انتخاب کنید");
+            }, 500);
         }
     }, "image/jpeg", 0.9);
 }
