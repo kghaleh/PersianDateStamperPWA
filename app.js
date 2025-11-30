@@ -4,8 +4,10 @@ const previewCtx = previewCanvas.getContext("2d");
 const placeholder = document.getElementById("placeholder");
 
 const btnCamera = document.getElementById("btnCamera");
+const btnGallery = document.getElementById("btnGallery");
 const btnShare = document.getElementById("btnShare");
 const inputCamera = document.getElementById("inputCamera");
+const inputGallery = document.getElementById("inputGallery");
 
 // canvas واقعی (فول‌سایز) برای پردازش و خروجی
 let realCanvas = null;
@@ -23,91 +25,398 @@ if ("serviceWorker" in navigator) {
 
 // ------------------ رویدادهای UI ------------------
 btnCamera.addEventListener("click", () => inputCamera.click());
+btnGallery.addEventListener("click", () => inputGallery.click());
 inputCamera.addEventListener("change", handleFileInput);
+inputGallery.addEventListener("change", handleFileInput);
 btnShare.addEventListener("click", handleShareOrDownload);
 
-// ------------------ فقط عکس از دوربین، با تاریخ همین لحظه ------------------
+// ------------------ عکس از دوربین یا گالری، با تاریخ اصلی عکس ------------------
 async function handleFileInput(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+    console.log('=== START handleFileInput ===');
+    console.log('Event type:', e.type);
+    console.log('Input element:', e.target.id);
+    
+    try {
+        const file = e.target.files[0];
+        
+        if (!file) {
+            console.log('No file selected');
+            return;
+        }
+        
+        console.log('File object:', {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified,
+            lastModifiedDate: file.lastModifiedDate
+        });
 
-    const img = await fileToImage(file);
+        // بررسی نوع فایل
+        const fileName = file.name.toLowerCase();
+        const isImage = file.type.startsWith('image/') || 
+                       fileName.endsWith('.jpg') || 
+                       fileName.endsWith('.jpeg') || 
+                       fileName.endsWith('.png') || 
+                       fileName.endsWith('.webp') ||
+                       fileName.endsWith('.gif');
+        
+        if (!isImage) {
+            throw new Error('لطفاً فقط فایل تصویری انتخاب کنید');
+        }
+        
+        // اگر HEIC بود، پیغام راهنما بده
+        if (fileName.endsWith('.heic') || fileName.endsWith('.heif')) {
+            throw new Error('فایل HEIC پشتیبانی نمی‌شود.\n\nلطفاً در تنظیمات دوربین، فرمت عکس را به JPG تغییر دهید.\n\nیا از دوربین مستقیماً عکس بگیرید.');
+        }
 
-    // تاریخ همین لحظه (سیستم)
-    const now = new Date();
-    await drawAndProcessImage(img, now);
+        // بررسی حجم فایل (حداکثر 20MB)
+        if (file.size > 20 * 1024 * 1024) {
+            throw new Error('حجم فایل نباید بیشتر از 20 مگابایت باشد');
+        }
 
-    // پاک کردن مقدار input تا بتوان چند بار پشت‌سرهم عکس گرفت
-    e.target.value = "";
+        // نمایش Loading
+        placeholder.textContent = '⏳ در حال بارگذاری...';
+        placeholder.style.display = 'block';
+        previewCanvas.style.display = 'none';
+        btnShare.disabled = true;
+
+        console.log('Step 1: Loading image...');
+        const img = await fileToImage(file);
+        console.log('Step 1 DONE: Image loaded:', img.width, 'x', img.height);
+
+        // بررسی اندازه تصویر
+        if (!img.width || !img.height) {
+            throw new Error('تصویر معتبر نیست');
+        }
+
+        // نمایش پیام پردازش
+        placeholder.textContent = '⏳ در حال پردازش...';
+
+        // تلاش برای خواندن تاریخ EXIF
+        console.log('Step 2: Reading EXIF...');
+        let photoDate = null;
+        try {
+            photoDate = await getPhotoDate(file);
+            console.log('Step 2 DONE: EXIF date:', photoDate);
+        } catch (exifError) {
+            console.warn('EXIF read failed, using fallback:', exifError);
+        }
+        
+        // اگر EXIF موجود نبود، از lastModified استفاده کن
+        if (!photoDate) {
+            photoDate = new Date(file.lastModified);
+            console.log('Using lastModified date:', photoDate);
+        }
+
+        console.log('Step 3: Processing image...');
+        await drawAndProcessImage(img, photoDate);
+        console.log('Step 3 DONE: Processing complete');
+
+        // پاک کردن مقدار input تا بتوان چند بار پشت‌سرهم عکس گرفت
+        e.target.value = "";
+        
+        console.log('=== END handleFileInput SUCCESS ===');
+        
+    } catch (error) {
+        console.error('=== ERROR in handleFileInput ===');
+        console.error('Error name:', error?.name);
+        console.error('Error message:', error?.message);
+        console.error('Error stack:', error?.stack);
+        console.error('Full error object:', error);
+        
+        const errorMsg = error && error.message ? error.message : 'خطای ناشناخته در پردازش عکس';
+        
+        placeholder.textContent = '❌ خطا: ' + errorMsg;
+        placeholder.style.display = 'block';
+        previewCanvas.style.display = 'none';
+        btnShare.disabled = true;
+        
+        // نمایش خطا به کاربر با جزئیات بیشتر
+        let detailedMsg = 'خطا در پردازش عکس:\n\n' + errorMsg;
+        
+        // اطلاعات اضافی برای debugging
+        if (error?.name) {
+            detailedMsg += '\n\nنوع خطا: ' + error.name;
+        }
+        
+        detailedMsg += '\n\nلطفاً عکس دیگری امتحان کنید یا از دوربین استفاده کنید.';
+        
+        alert(detailedMsg);
+        
+        // Reset input
+        e.target.value = "";
+        
+        console.log('=== END handleFileInput ERROR ===');
+    }
 }
 
 function fileToImage(file) {
     return new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = () => {
-            URL.revokeObjectURL(url);
-            resolve(img);
+        console.log('fileToImage started:', {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified
+        });
+
+        // روش مستقیم: فقط FileReader (ساده‌ترین و قابل اطمینان‌ترین برای Samsung)
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            console.log('FileReader onload fired, data length:', e.target.result?.length);
+            
+            const img = new Image();
+            
+            // حذف CORS برای جلوگیری از مشکل
+            // img.crossOrigin = "anonymous"; // ← این رو حذف می‌کنیم
+            
+            let loadTimeout = setTimeout(() => {
+                console.error('Image load timeout after FileReader');
+                reject(new Error('زمان بارگذاری تصویر به پایان رسید. لطفاً دوباره تلاش کنید.'));
+            }, 15000); // 15 ثانیه
+
+            img.onload = () => {
+                clearTimeout(loadTimeout);
+                console.log('Image loaded successfully:', img.width, 'x', img.height);
+                
+                if (!img.width || !img.height) {
+                    reject(new Error('تصویر بارگذاری شد اما اندازه آن صفر است'));
+                    return;
+                }
+                
+                resolve(img);
+            };
+            
+            img.onerror = (error) => {
+                clearTimeout(loadTimeout);
+                console.error('Image onerror fired:', error);
+                console.error('Image src length:', img.src?.substring(0, 100));
+                reject(new Error('خطا در نمایش تصویر. فرمت فایل پشتیبانی نمی‌شود.'));
+            };
+            
+            // تنظیم src
+            console.log('Setting image src, data URL length:', e.target.result.length);
+            img.src = e.target.result;
         };
-        img.onerror = reject;
-        img.src = url;
+        
+        reader.onerror = (error) => {
+            console.error('FileReader onerror:', error);
+            reject(new Error('خطا در خواندن فایل. لطفاً مجوزهای برنامه را بررسی کنید.'));
+        };
+        
+        reader.onabort = () => {
+            console.error('FileReader onabort');
+            reject(new Error('خواندن فایل لغو شد'));
+        };
+        
+        try {
+            console.log('Starting FileReader.readAsDataURL');
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('FileReader.readAsDataURL exception:', error);
+            reject(new Error('نمی‌توان فایل را خواند: ' + error.message));
+        }
     });
+}
+
+// خواندن تاریخ اصلی عکس از EXIF
+async function getPhotoDate(file) {
+    return new Promise((resolve) => {
+        try {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const view = new DataView(e.target.result);
+                    
+                    // بررسی JPEG Marker
+                    if (view.getUint16(0, false) !== 0xFFD8) {
+                        console.log('Not a JPEG file');
+                        resolve(null);
+                        return;
+                    }
+                    
+                    let offset = 2;
+                    const length = view.byteLength;
+                    
+                    while (offset < length) {
+                        if (view.getUint16(offset + 2, false) <= 8) {
+                            resolve(null);
+                            return;
+                        }
+                        
+                        const marker = view.getUint16(offset, false);
+                        offset += 2;
+                        
+                        // APP1 Marker (EXIF)
+                        if (marker === 0xFFE1) {
+                            const exifDate = parseEXIFDate(view, offset);
+                            if (exifDate) {
+                                console.log('Found EXIF date:', exifDate);
+                                resolve(exifDate);
+                                return;
+                            }
+                        }
+                        
+                        offset += view.getUint16(offset, false);
+                    }
+                    
+                    console.log('No EXIF date found');
+                    resolve(null);
+                } catch (error) {
+                    console.error('Error reading EXIF:', error);
+                    resolve(null);
+                }
+            };
+            
+            reader.onerror = (error) => {
+                console.error('FileReader error:', error);
+                resolve(null);
+            };
+            
+            // خواندن اول 64KB (یا کل فایل اگر کوچکتر باشد)
+            const blob = file.slice(0, Math.min(64 * 1024, file.size));
+            reader.readAsArrayBuffer(blob);
+            
+        } catch (error) {
+            console.error('Error in getPhotoDate:', error);
+            resolve(null);
+        }
+    });
+}
+
+// تجزیه تاریخ از EXIF
+function parseEXIFDate(view, offset) {
+    try {
+        // پیدا کردن DateTimeOriginal tag (0x9003)
+        const littleEndian = view.getUint16(offset + 10, false) === 0x4949;
+        const ifdOffset = view.getUint32(offset + 14, littleEndian) + offset + 10;
+        const tags = view.getUint16(ifdOffset, littleEndian);
+        
+        for (let i = 0; i < tags; i++) {
+            const tagOffset = ifdOffset + 2 + (i * 12);
+            const tag = view.getUint16(tagOffset, littleEndian);
+            
+            // DateTimeOriginal (0x9003) یا DateTime (0x0132)
+            if (tag === 0x9003 || tag === 0x0132) {
+                const dataOffset = view.getUint32(tagOffset + 8, littleEndian) + offset + 10;
+                let dateStr = '';
+                
+                for (let j = 0; j < 19; j++) {
+                    const char = view.getUint8(dataOffset + j);
+                    if (char === 0) break;
+                    dateStr += String.fromCharCode(char);
+                }
+                
+                // تبدیل "2023:11:30 14:25:30" به Date object
+                if (dateStr.length === 19) {
+                    const parts = dateStr.split(' ');
+                    const datePart = parts[0].replace(/:/g, '-');
+                    const timePart = parts[1];
+                    return new Date(`${datePart}T${timePart}`);
+                }
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        return null;
+    }
 }
 
 // ------------------ پردازش تصویر (فول‌سایز + preview) ------------------
 async function drawAndProcessImage(img, date) {
-    // ۱) canvas واقعی فول‌سایز
-    realCanvas = document.createElement("canvas");
-    realCanvas.width = img.width;
-    realCanvas.height = img.height;
-    realCtx = realCanvas.getContext("2d");
+    try {
+        console.log('drawAndProcessImage started');
+        
+        // محدودیت اندازه تصویر (برای جلوگیری از مشکل حافظه در موبایل)
+        const MAX_DIMENSION = 4096; // حداکثر 4096 پیکسل
+        let targetWidth = img.width;
+        let targetHeight = img.height;
+        
+        if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+            const scale = Math.min(MAX_DIMENSION / img.width, MAX_DIMENSION / img.height);
+            targetWidth = Math.floor(img.width * scale);
+            targetHeight = Math.floor(img.height * scale);
+            console.log('Resizing image from', img.width, 'x', img.height, 'to', targetWidth, 'x', targetHeight);
+        }
+        
+        // ۱) canvas واقعی فول‌سایز
+        realCanvas = document.createElement("canvas");
+        realCanvas.width = targetWidth;
+        realCanvas.height = targetHeight;
+        realCtx = realCanvas.getContext("2d", { 
+            willReadFrequently: true,
+            alpha: false 
+        });
 
-    // رسم تصویر اصلی در سایز واقعی
-    realCtx.drawImage(img, 0, 0, img.width, img.height);
+        if (!realCtx) {
+            throw new Error('نمی‌توان Canvas ایجاد کرد. لطفاً مرورگر را ببندید و دوباره باز کنید.');
+        }
 
-    // ۲) اعمال فیلترها روی فول‌سایز
-    enhanceImage(realCtx, realCanvas.width, realCanvas.height);
+        // رسم تصویر اصلی در سایز واقعی (یا ریسایز شده)
+        realCtx.drawImage(img, 0, 0, targetWidth, targetHeight);
+        console.log('Image drawn to canvas');
 
-    // ۳) محاسبه تاریخ و متن
-    const persianDate = gregorianToPersian(date);
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-    const timeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+        // ۲) اعمال فیلترها روی فول‌سایز
+        try {
+            enhanceImage(realCtx, realCanvas.width, realCanvas.height);
+            console.log('Filters applied');
+        } catch (filterError) {
+            console.warn('Filter error (skipping):', filterError);
+            // اگر فیلتر خطا داد، ادامه بده بدون فیلتر
+        }
 
-    const weekdayFa = persianWeekDays[date.getDay()];
-    const dateText = `${persianDate.year}/${persianDate.month}/${persianDate.day}`;
-    const fullText = `${weekdayFa}  ${dateText}  ${timeStr}`;
-    const fullTextFarsi = convertToFarsiDigits(fullText);
+        // ۳) محاسبه تاریخ و متن
+        const persianDate = gregorianToPersian(date);
+        const hour = date.getHours();
+        const minute = date.getMinutes();
+        const timeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
-    // ۴) افزودن استمپ روی فول‌سایز
-    await addTextToCanvas(realCtx, realCanvas, fullTextFarsi);
+        const weekdayFa = persianWeekDays[date.getDay()];
+        const dateText = `${persianDate.year}/${persianDate.month}/${persianDate.day}`;
+        const fullText = `${weekdayFa}  ${dateText}  ${timeStr}`;
+        const fullTextFarsi = convertToFarsiDigits(fullText);
+        console.log('Date text:', fullTextFarsi);
 
-    // ۵) ساخت preview برای نمایش در صفحه
-    const container = previewCanvas.parentElement;
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight || 400;
+        // ۴) افزودن استمپ روی فول‌سایز
+        await addTextToCanvas(realCtx, realCanvas, fullTextFarsi);
+        console.log('Text added to canvas');
 
-    const scaleW = containerWidth / realCanvas.width;
-    const scaleH = containerHeight / realCanvas.height;
-    const scale = Math.min(scaleW, scaleH, 1); // حداکثر 1 (بدون بزرگنمایی)
+        // ۵) ساخت preview برای نمایش در صفحه
+        const container = previewCanvas.parentElement;
+        const containerWidth = container.clientWidth || 400;
+        const containerHeight = container.clientHeight || 400;
 
-    previewCanvas.width = realCanvas.width * scale;
-    previewCanvas.height = realCanvas.height * scale;
+        const scaleW = containerWidth / realCanvas.width;
+        const scaleH = containerHeight / realCanvas.height;
+        const scale = Math.min(scaleW, scaleH, 1); // حداکثر 1 (بدون بزرگنمایی)
 
-    placeholder.style.display = "none";
-    previewCanvas.style.display = "block";
+        previewCanvas.width = Math.floor(realCanvas.width * scale);
+        previewCanvas.height = Math.floor(realCanvas.height * scale);
 
-    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-    previewCtx.drawImage(realCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+        placeholder.style.display = "none";
+        previewCanvas.style.display = "block";
 
-    currentImageCanvas = realCanvas; // خروجی فول‌رزولوشن
-    btnShare.disabled = false;
+        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        previewCtx.drawImage(realCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+        console.log('Preview rendered');
+
+        currentImageCanvas = realCanvas; // خروجی فول‌رزولوشن
+        btnShare.disabled = false;
+        
+    } catch (error) {
+        console.error('Error in drawAndProcessImage:', error);
+        const errorMsg = error && error.message ? error.message : 'خطا در رندر کردن تصویر';
+        throw new Error(errorMsg);
+    }
 }
 
 /* ------------------ منطق تاریخ فارسی ------------------ */
 
 const persianWeekDays = [
-    "یکشنبه","دوشنبه","سه\u200cشنبه","چهارشنبه","پنج\u200cشنبه","جمعه","شنبه"
+    "یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنج‌شنبه","جمعه","شنبه"
 ];
 
 function convertToFarsiDigits(text) {
@@ -167,14 +476,26 @@ function gregorianToPersian(date) {
 /* ------------------ فیلترها: Dehaze + Clarity + Saturation ------------------ */
 
 function enhanceImage(ctx, width, height, dehazeStrength = 0.18, clarityStrength = 0.3, saturationBoost = 1.03) {
-    applyDehaze(ctx, width, height, dehazeStrength);
+    try {
+        applyDehaze(ctx, width, height, dehazeStrength);
+    } catch (e) {
+        console.warn('Dehaze filter failed:', e);
+    }
 
     if (clarityStrength > 0) {
-        applyClarity(ctx, width, height, clarityStrength);
+        try {
+            applyClarity(ctx, width, height, clarityStrength);
+        } catch (e) {
+            console.warn('Clarity filter failed:', e);
+        }
     }
 
     if (saturationBoost !== 1.0) {
-        applySaturation(ctx, width, height, saturationBoost);
+        try {
+            applySaturation(ctx, width, height, saturationBoost);
+        } catch (e) {
+            console.warn('Saturation filter failed:', e);
+        }
     }
 }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>عکس به همراه تاریخ فارسی</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
@@ -12,7 +12,18 @@
 
     <!-- iOS PWA meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PersianDate">
+    
+    <!-- Android PWA meta -->
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Prevent zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Icons for iOS -->
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png">
 </head>
 <body>
 <div class="root">
@@ -24,20 +35,27 @@
 
     <!-- پیش‌نمایش عکس -->
     <div class="image-container">
-        <canvas id="canvas" class="image-preview"></canvas>
-        <div id="placeholder" class="placeholder">
-            📸 برای شروع، با دوربین عکس بگیرید
+        <div>
+            <canvas id="canvas" class="image-preview"></canvas>
+            <div id="placeholder" class="placeholder">
+                📸 برای شروع، عکس بگیرید یا از گالری انتخاب کنید
+            </div>
         </div>
     </div>
 
-    <!-- دکمهٔ عکس گرفتن -->
-    <button id="btnCamera" class="btn btn-camera">
-        📷 عکس بگیرید
-    </button>
+    <!-- ردیف اول: دکمه‌های دوربین و گالری -->
+    <div class="button-row">
+        <button id="btnCamera" class="btn btn-camera">
+            📷 عکس‌برداری
+        </button>
+        <button id="btnGallery" class="btn btn-gallery">
+            🖼️ انتخاب از گالری
+        </button>
+    </div>
 
-    <!-- دکمه اشتراک‌گذاری / دانلود -->
+    <!-- ردیف دوم: دکمه اشتراک‌گذاری -->
     <button id="btnShare" class="btn btn-share" disabled>
-        📤 اشتراک‌گذاری / دانلود
+        📤 اشتراک‌گذاری / ذخیره
     </button>
 
     <!-- امضای توسعه‌دهنده -->
@@ -45,31 +63,25 @@
         Developed by K. Ghaleh
     </div>
 
-    <!-- فقط input دوربین -->
+    <!-- Input دوربین -->
     <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            id="inputCamera"
-            class="hidden-input"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        id="inputCamera"
+        class="hidden-input"
+    >
+
+    <!-- Input گالری -->
+    <input
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+        id="inputGallery"
+        class="hidden-input"
     >
 
 </div>
 
 <script src="app.js"></script>
-<script>
-    if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-            navigator.serviceWorker
-                .register("./sw.js")
-                .then(function (reg) {
-                    console.log("Service worker registered:", reg.scope);
-                })
-                .catch(function (err) {
-                    console.error("Service worker registration failed:", err);
-                });
-        });
-    }
-</script>
 </body>
 </html>
