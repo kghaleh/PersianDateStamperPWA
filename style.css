@@ -12,7 +12,7 @@ html, body {
     /*position: fixed; */
     overflow: hidden;
     overscroll-behavior: none;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e, #3b185f, #0a84ff);
+    background: linear-gradient(135deg, #261d75 0%, #484194 25%, #24243e 50%, #3b185f 75%, #359aff 100%);
 
     background-size: 150% 150%;
     animation: gradientMove 12s ease infinite;
