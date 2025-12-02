@@ -696,6 +696,7 @@ async function handleShareOrDownload() {
     }, "image/jpeg", 0.9);
 }
 
+// اشتراک‌گذاری مستقیم به واتس‌آپ
 function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

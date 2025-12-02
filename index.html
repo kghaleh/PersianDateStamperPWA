@@ -2,28 +2,34 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>عکس به همراه تاریخ فارسی</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
+    <title>عکس به همراه تاریخ فارسی</title>
+
+    <!-- Viewport برای موبایل + iPhone (safe area) -->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    >
+
+    <!-- PWA / Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
+    <meta name="color-scheme" content="dark">
 
-    <link rel="stylesheet" href="style.css">
-
-    <!-- iOS PWA meta -->
+    <!-- iOS PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="PersianDate">
-    
-    <!-- Android PWA meta -->
+
+    <!-- Android PWA -->
     <meta name="mobile-web-app-capable" content="yes">
-    
-    <!-- Prevent zoom -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    
-    <!-- Icons for iOS -->
+
+    <!-- آیکون‌ها -->
     <link rel="apple-touch-icon" href="assets/icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png">
+
+    <!-- استایل -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="root">
@@ -53,7 +59,7 @@
         </button>
     </div>
 
-    <!-- ردیف دوم: دکمه اشتراک‌گذاری -->
+    <!-- دکمه اشتراک‌گذاری -->
     <button id="btnShare" class="btn btn-share" disabled>
         📤 اشتراک‌گذاری / ذخیره
     </button>
