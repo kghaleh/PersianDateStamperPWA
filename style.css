@@ -14,8 +14,8 @@ html, body {
     overscroll-behavior: none;
     background: linear-gradient(135deg, #0f0c29, #302b63, #24243e, #3b185f, #0a84ff);
 
-    background-size: 250% 250%;
-    animation: gradientMove 15s ease infinite;
+    background-size: 150% 150%;
+    animation: gradientMove 12s ease infinite;
 }
 
 @keyframes gradientMove {
