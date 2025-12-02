@@ -51,7 +51,7 @@ body {
     font-size: clamp(20px, 4.5vw, 28px);
     font-weight: bold;
     text-align: center;
-    margin-bottom: clamp(8px, 1.5vh, 15px);
+    margin-bottom: 0;
     flex-shrink: 0;
     
     /* Dark glass for better text readability */
@@ -71,8 +71,8 @@ body {
 .image-container {
     position: relative;
     width: 100%;
-    flex: 1;
-    min-height: 200px;
+    flex: 1 1 auto;
+    min-height: 0;
     
     /* Darker glass for better image contrast */
     background: rgba(0, 0, 0, 0.3);
