@@ -1,5 +1,5 @@
 // نام کش – هر بار تغییر مهم دادی، نسخه را عوض کن
-const CACHE_NAME = "persian-date-stamper-v26";
+const CACHE_NAME = "persian-date-stamper-v27";
 
 // فایل‌هایی که باید کش شوند
 const ASSETS = [
