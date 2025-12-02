@@ -132,6 +132,14 @@ body {
     background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
 }
 
+.btn-whatsapp {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+}
+
+.btn-whatsapp:hover:not(:disabled) {
+    background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+}
+
 .btn-share {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }

@@ -6,6 +6,7 @@ const placeholder = document.getElementById("placeholder");
 const btnCamera = document.getElementById("btnCamera");
 const btnGallery = document.getElementById("btnGallery");
 const btnShare = document.getElementById("btnShare");
+const btnWhatsApp = document.getElementById("btnWhatsApp");
 const inputCamera = document.getElementById("inputCamera");
 const inputGallery = document.getElementById("inputGallery");
 
@@ -29,6 +30,7 @@ btnGallery.addEventListener("click", () => inputGallery.click());
 inputCamera.addEventListener("change", handleFileInput);
 inputGallery.addEventListener("change", handleFileInput);
 btnShare.addEventListener("click", handleShareOrDownload);
+btnWhatsApp.addEventListener("click", handleShareToWhatsApp);
 
 // ------------------ عکس از دوربین یا گالری، با تاریخ اصلی عکس ------------------
 async function handleFileInput(e) {
@@ -80,6 +82,7 @@ async function handleFileInput(e) {
         placeholder.style.display = 'block';
         previewCanvas.style.display = 'none';
         btnShare.disabled = true;
+        btnWhatsApp.disabled = true;
 
         console.log('Step 1: Loading image...');
         const img = await fileToImage(file);
@@ -131,6 +134,7 @@ async function handleFileInput(e) {
         placeholder.style.display = 'block';
         previewCanvas.style.display = 'none';
         btnShare.disabled = true;
+        btnWhatsApp.disabled = true;
         
         // نمایش خطا به کاربر با جزئیات بیشتر
         let detailedMsg = 'خطا در پردازش عکس:\n\n' + errorMsg;
@@ -405,6 +409,7 @@ async function drawAndProcessImage(img, date) {
 
         currentImageCanvas = realCanvas; // خروجی فول‌رزولوشن
         btnShare.disabled = false;
+        btnWhatsApp.disabled = false;
         
     } catch (error) {
         console.error('Error in drawAndProcessImage:', error);
@@ -692,6 +697,41 @@ async function handleShareOrDownload() {
             // share در دسترس نیست → دانلود
             downloadBlob(blob, "persian-date-photo.jpg");
             clearCacheNow();
+        }
+    }, "image/jpeg", 0.9);
+}
+
+// اشتراک‌گذاری مستقیم به واتس‌آپ
+async function handleShareToWhatsApp() {
+    if (!currentImageCanvas) return;
+
+    currentImageCanvas.toBlob(async blob => {
+        if (!blob) return;
+
+        const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
+
+        // تلاش برای اشتراک‌گذاری
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: "Persian Date Photo"
+                });
+
+                clearCacheNow();
+            } catch (e) {
+                // اگر کاربر لغو کرد یا خطا داد
+                console.log("Share cancelled or failed:", e);
+            }
+        } else {
+            // Fallback: دانلود فایل
+            downloadBlob(blob, "persian-date-photo.jpg");
+            clearCacheNow();
+            
+            // راهنمایی به کاربر
+            setTimeout(() => {
+                alert("عکس ذخیره شد!\n\nاکنون می‌توانید از گالری آن را در واتس‌آپ به اشتراک بگذارید.");
+            }, 300);
         }
     }, "image/jpeg", 0.9);
 }
