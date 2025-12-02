@@ -12,9 +12,9 @@ html, body {
     /*position: fixed; */
     overflow: hidden;
     overscroll-behavior: none;
-    background: linear-gradient(135deg, #1b35a7 0%, #3d1763 25%, #610303 50%, #4facfe 75%,#00305a 100% );
-    background-size: 300% 300%;
-    animation: gradientMove 8s ease infinite;
+    background: linear-gradient(135deg, #1b35a7 0%, #3d1763 25%, #4e0101 50%, #4facfe 75%,#00305a 100% );
+    background-size: 200% 200%;
+    animation: gradientMove 12s ease infinite;
 }
 
 @keyframes gradientMove {
