@@ -20,6 +20,10 @@ body {
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
     
+    /* Fallback for iOS */
+    background-attachment: fixed;
+    -webkit-animation: gradientShift 15s ease infinite;
+    
     color: #ffffff;
     display: flex;
     justify-content: center;
@@ -29,6 +33,13 @@ body {
 }
 
 @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* iOS specific keyframes */
+@-webkit-keyframes gradientShift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
@@ -55,14 +66,18 @@ body {
     flex-shrink: 0;
     
     /* Dark glass for better text readability */
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: clamp(12px, 3vw, 20px);
     padding: clamp(12px, 2vh, 18px);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    
+    /* iOS specific */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
     
     /* Bright white text */
     color: #ffffff;
@@ -75,12 +90,17 @@ body {
     min-height: 0;
     
     /* Darker glass for better image contrast */
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: clamp(16px, 3vw, 24px);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    
+    /* iOS specific */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
     
     overflow: hidden;
     display: flex;
@@ -145,12 +165,16 @@ body {
     -webkit-tap-highlight-color: transparent;
     
     /* Darker glass for better text readability */
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.35);
     box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    
+    /* iOS specific */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
     
     position: relative;
     overflow: hidden;
