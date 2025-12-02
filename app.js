@@ -6,7 +6,6 @@ const placeholder = document.getElementById("placeholder");
 const btnCamera = document.getElementById("btnCamera");
 const btnGallery = document.getElementById("btnGallery");
 const btnShare = document.getElementById("btnShare");
-const btnWhatsApp = document.getElementById("btnWhatsApp");
 const inputCamera = document.getElementById("inputCamera");
 const inputGallery = document.getElementById("inputGallery");
 
@@ -30,7 +29,6 @@ btnGallery.addEventListener("click", () => inputGallery.click());
 inputCamera.addEventListener("change", handleFileInput);
 inputGallery.addEventListener("change", handleFileInput);
 btnShare.addEventListener("click", handleShareOrDownload);
-btnWhatsApp.addEventListener("click", handleShareToWhatsApp);
 
 // ------------------ عکس از دوربین یا گالری، با تاریخ اصلی عکس ------------------
 async function handleFileInput(e) {
@@ -82,7 +80,6 @@ async function handleFileInput(e) {
         placeholder.style.display = 'block';
         previewCanvas.style.display = 'none';
         btnShare.disabled = true;
-        btnWhatsApp.disabled = true;
 
         console.log('Step 1: Loading image...');
         const img = await fileToImage(file);
@@ -134,7 +131,6 @@ async function handleFileInput(e) {
         placeholder.style.display = 'block';
         previewCanvas.style.display = 'none';
         btnShare.disabled = true;
-        btnWhatsApp.disabled = true;
         
         // نمایش خطا به کاربر با جزئیات بیشتر
         let detailedMsg = 'خطا در پردازش عکس:\n\n' + errorMsg;
@@ -409,7 +405,6 @@ async function drawAndProcessImage(img, date) {
 
         currentImageCanvas = realCanvas; // خروجی فول‌رزولوشن
         btnShare.disabled = false;
-        btnWhatsApp.disabled = false;
         
     } catch (error) {
         console.error('Error in drawAndProcessImage:', error);
@@ -702,73 +697,6 @@ async function handleShareOrDownload() {
 }
 
 // اشتراک‌گذاری مستقیم به واتس‌آپ
-async function handleShareToWhatsApp() {
-    if (!currentImageCanvas) return;
-
-    currentImageCanvas.toBlob(async blob => {
-        if (!blob) return;
-
-        // ذخیره موقت فایل
-        const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
-
-        try {
-            // روش 1: تلاش برای Share با هدف واتس‌آپ (Android)
-            if (navigator.share) {
-                // در Android، بعضی مرورگرها از "Share to specific app" پشتیبانی می‌کنن
-                await navigator.share({
-                    files: [file],
-                    title: "Persian Date Photo"
-                });
-                
-                clearCacheNow();
-                return;
-            }
-        } catch (shareError) {
-            console.log("Share API not available or cancelled:", shareError);
-        }
-
-        // روش 2: باز کردن مستقیم واتس‌آپ با URL Scheme
-        try {
-            // ذخیره فایل محلی
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "persian-date-photo.jpg";
-            a.click();
-            URL.revokeObjectURL(url);
-
-            // صبر کن تا فایل ذخیره بشه
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // باز کردن واتس‌آپ
-            // این URL واتس‌آپ رو باز می‌کنه (بدون پیام - فقط اپ)
-            const whatsappUrl = "whatsapp://send";
-            window.location.href = whatsappUrl;
-
-            // پیغام راهنما
-            setTimeout(() => {
-                alert("عکس ذخیره شد و واتس‌آپ باز شد.\n\nعکس را از گالری در واتس‌آپ به اشتراک بگذارید.");
-            }, 1000);
-
-            clearCacheNow();
-        } catch (error) {
-            console.error("WhatsApp direct open failed:", error);
-            
-            // Fallback نهایی: فقط دانلود
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "persian-date-photo.jpg";
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            alert("عکس ذخیره شد!\n\nبرای اشتراک در واتس‌آپ:\n1. واتس‌آپ را باز کنید\n2. از گالری عکس را انتخاب کنید");
-            
-            clearCacheNow();
-        }
-    }, "image/jpeg", 0.9);
-}
-
 function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
