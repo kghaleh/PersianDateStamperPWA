@@ -13,12 +13,24 @@ html, body {
     overscroll-behavior: none;
     
     /* Fallback: Static gradient for browsers without animation support */
-    background: linear-gradient(135deg, #231557, #44107a, #ff1361, #fff800, #2b00ff);
+    background: linear-gradient(135deg, #0a192f, #1e3a5f, #2e5266, #4a7c8e, #d4af37);
     
-    /* Animated gradient */
+    /* Animated gradient - Royal Blue & Gold */
+    background: linear-gradient(
+        135deg,
+        #0a192f 0%,    /* آبی سیاه عمیق */
+        #172a45 15%,   /* آبی شب */
+        #1e3a5f 30%,   /* آبی دریای عمیق */
+        #2e5266 45%,   /* آبی اقیانوس */
+        #4a7c8e 60%,   /* آبی فیروزه‌ای */
+        #8b7355 75%,   /* برنز */
+        #c9a961 90%,   /* طلایی کم‌رنگ */
+        #d4af37 100%   /* طلایی درخشان */
+    );
+    
     background-size: 400% 400%;
-    animation: gradientMove 12s ease infinite;
-    -webkit-animation: gradientMove 12s ease infinite;
+    animation: gradientMove 15s ease infinite;
+    -webkit-animation: gradientMove 15s ease infinite;
     
     /* Performance optimization */
     will-change: background-position;
