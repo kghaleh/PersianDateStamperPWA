@@ -22,6 +22,9 @@
 html {
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    position: fixed;
+    overscroll-behavior: none;
 }
 
 body {
@@ -31,6 +34,7 @@ body {
     margin: 0;
 
     font-family: "Vazir", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #121212;
     color: #ffffff;
 
     /* بک‌گراند تیره + گرادیانت */
@@ -49,16 +53,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-
-    /* بدون اسکرول */
-    overflow: hidden;
-    overscroll-behavior: none;
-
-    /* safe area برای iPhone */
-    padding: env(safe-area-inset-top)
-             env(safe-area-inset-right)
-             env(safe-area-inset-bottom)
-             env(safe-area-inset-left);
+    
+    /* پشتیبانی از Safe Area (iPhone X و بالاتر) */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 @supports (padding: max(0px)) {
@@ -87,14 +84,6 @@ body {
     font-weight: bold;
     text-align: center;
     flex-shrink: 0;
-
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-
-    color: #ffffff;
 }
 
 /* کانتینر تصویر */
@@ -102,13 +91,9 @@ body {
     position: relative;
     width: 100%;
     flex: 1;
-    min-height: 0;
-
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-
+    min-height: 200px;
+    background: #1e1e1e;
+    border-radius: clamp(8px, 2vw, 12px);
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -141,7 +126,6 @@ body {
     font-weight: 500;
 }
 
-/* ردیف دکمه‌ها */
 .button-row {
     display: flex;
     gap: 12px;
@@ -167,11 +151,6 @@ body {
     white-space: nowrap;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.5);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .btn:active {
@@ -194,11 +173,13 @@ body {
 }
 
 .btn-share {
-    background: linear-gradient(135deg, #4facfe, #00f2fe);
-    border-color: #00f2fe;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-/* امضای توسعه‌دهنده */
+.btn-share:hover:not(:disabled) {
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+}
+
 .developer {
     text-align: center;
     font-size: 12px;
@@ -214,16 +195,65 @@ body {
     display: none;
 }
 
-/* iPhone SE و گوشی‌های کوچک */
-@media (max-height: 667px) {
-    .title { font-size: 20px; padding: 12px; }
-    .btn { padding: 14px 16px; font-size: 15px; }
-    .root { padding: 12px; gap: 10px; }
+/* Responsive برای موبایل‌های کوچک */
+@media (max-height: 600px) {
+    .root {
+        gap: clamp(6px, 1vh, 10px);
+    }
+    
+    .title {
+        font-size: clamp(16px, 3.5vw, 20px);
+        margin-bottom: 5px;
+    }
+    
+    .image-container {
+        min-height: 180px;
+    }
+    
+    .btn {
+        padding: clamp(10px, 2vh, 12px) clamp(12px, 2.5vw, 16px);
+        font-size: clamp(12px, 2.5vw, 14px);
+    }
 }
 
-/* گوشی‌های بلندتر */
-@media (min-height: 800px) {
-    .title { font-size: 26px; padding: 18px; }
-    .btn { padding: 18px 24px; font-size: 17px; }
-    .root { padding: 18px; gap: 15px; }
+/* Responsive برای صفحه‌های بسیار کوچک */
+@media (max-width: 360px) {
+    .btn {
+        font-size: 12px;
+        padding: 10px 12px;
+    }
+    
+    .title {
+        font-size: 16px;
+    }
+    
+    .image-container {
+        min-height: 150px;
+    }
+}
+
+/* Responsive برای تبلت و بالاتر */
+@media (min-width: 768px) {
+    .root {
+        max-width: 500px;
+    }
+}
+
+/* تنظیمات خاص برای iPhone با notch */
+@supports (padding: max(0px)) {
+    body {
+        padding-top: max(env(safe-area-inset-top), 10px);
+        padding-bottom: max(env(safe-area-inset-bottom), 10px);
+    }
+}
+
+/* Landscape mode */
+@media (orientation: landscape) {
+    .image-container {
+        min-height: 50vh;
+    }
+    
+    .root {
+        gap: clamp(6px, 1vh, 12px);
+    }
 }
