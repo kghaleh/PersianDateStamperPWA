@@ -708,30 +708,63 @@ async function handleShareToWhatsApp() {
     currentImageCanvas.toBlob(async blob => {
         if (!blob) return;
 
+        // ذخیره موقت فایل
         const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
 
-        // تلاش برای اشتراک‌گذاری
-        if (navigator.share) {
-            try {
+        try {
+            // روش 1: تلاش برای Share با هدف واتس‌آپ (Android)
+            if (navigator.share) {
+                // در Android، بعضی مرورگرها از "Share to specific app" پشتیبانی می‌کنن
                 await navigator.share({
                     files: [file],
                     title: "Persian Date Photo"
                 });
-
+                
                 clearCacheNow();
-            } catch (e) {
-                // اگر کاربر لغو کرد یا خطا داد
-                console.log("Share cancelled or failed:", e);
+                return;
             }
-        } else {
-            // Fallback: دانلود فایل
-            downloadBlob(blob, "persian-date-photo.jpg");
-            clearCacheNow();
-            
-            // راهنمایی به کاربر
+        } catch (shareError) {
+            console.log("Share API not available or cancelled:", shareError);
+        }
+
+        // روش 2: باز کردن مستقیم واتس‌آپ با URL Scheme
+        try {
+            // ذخیره فایل محلی
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "persian-date-photo.jpg";
+            a.click();
+            URL.revokeObjectURL(url);
+
+            // صبر کن تا فایل ذخیره بشه
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // باز کردن واتس‌آپ
+            // این URL واتس‌آپ رو باز می‌کنه (بدون پیام - فقط اپ)
+            const whatsappUrl = "whatsapp://send";
+            window.location.href = whatsappUrl;
+
+            // پیغام راهنما
             setTimeout(() => {
-                alert("عکس ذخیره شد!\n\nاکنون می‌توانید از گالری آن را در واتس‌آپ به اشتراک بگذارید.");
-            }, 300);
+                alert("عکس ذخیره شد و واتس‌آپ باز شد.\n\nعکس را از گالری در واتس‌آپ به اشتراک بگذارید.");
+            }, 1000);
+
+            clearCacheNow();
+        } catch (error) {
+            console.error("WhatsApp direct open failed:", error);
+            
+            // Fallback نهایی: فقط دانلود
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "persian-date-photo.jpg";
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert("عکس ذخیره شد!\n\nبرای اشتراک در واتس‌آپ:\n1. واتس‌آپ را باز کنید\n2. از گالری عکس را انتخاب کنید");
+            
+            clearCacheNow();
         }
     }, "image/jpeg", 0.9);
 }
