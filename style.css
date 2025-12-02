@@ -14,22 +14,22 @@ html, body {
     
     /* Fallback: Static radial gradient for browsers without animation support */
     background: radial-gradient(circle at center,
-        #d4af37, #c9a961, #8b7355, #4a7c8e, #2e5266, #1e3a5f, #172a45, #0a192f
+        #0b006e, #210099, #3f6af5, #1c3874, #012b7a, #08428d, #19207e, #001b44
     );
     
     /* Animated radial gradient - Royal Soft Circle */
     background: radial-gradient(circle at 50% 50%,
-        #d4af37 0%,    /* طلایی درخشان - مرکز */
-        #c9a961 10%,   /* طلایی ملایم */
-        #8b7355 25%,   /* برنز */
-        #4a7c8e 40%,   /* آبی فیروزه‌ای */
-        #2e5266 55%,   /* آبی اقیانوس */
-        #1e3a5f 70%,   /* آبی دریای عمیق */
-        #172a45 85%,   /* آبی شب */
+        #013ec4 0%,    /* طلایی درخشان - مرکز */
+        #0b4191 10%,   /* طلایی ملایم */
+        #0257c5 25%,   /* برنز */
+        #09247c 40%,   /* آبی فیروزه‌ای */
+        #08265e 55%,   /* آبی اقیانوس */
+        #0b073d 70%,   /* آبی دریای عمیق */
+        #050e36 85%,   /* آبی شب */
         #0a192f 100%   /* آبی سیاه عمیق */
     );
     
-    background-size: 150% 150%;
+    background-size: 600% 600%;
     animation: radialMove 15s ease infinite;
     -webkit-animation: radialMove 15s ease infinite;
     
@@ -110,7 +110,7 @@ body {
     flex: 1;
     min-height: 0;
     
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.726);
     border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 20px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
@@ -194,17 +194,17 @@ body {
 }
 
 .btn-camera {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-color: #764ba2;
+    background: linear-gradient(135deg, #667eea, #0a01419c);
+    border-color: #00979c;
 }
 
 .btn-gallery {
-    background: linear-gradient(135deg, #f093fb, #f5576c);
-    border-color: #f5576c;
+    background: linear-gradient(135deg, #5d0068a2, #4d0000);
+    border-color: #7d0181;
 }
 
 .btn-share {
-    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    background: linear-gradient(135deg, #002d55ad, #00f2fe);
     border-color: #00f2fe;
 }
 
