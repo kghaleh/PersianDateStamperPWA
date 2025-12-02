@@ -188,14 +188,14 @@ body {
 
 /* iPhone SE و گوشی‌های کوچک */
 @media (max-height: 667px) {
-    .title { font-size: 20px; padding: 12px; }
+    .title { font-size: 18px; padding: 12px; }
     .btn { padding: 14px 16px; font-size: 15px; }
     .root { padding: 12px; gap: 10px; }
 }
 
 /* گوشی‌های بزرگ */
 @media (min-height: 800px) {
-    .title { font-size: 26px; padding: 18px; }
+    .title { font-size: 22px; padding: 18px; }
     .btn { padding: 18px 24px; font-size: 17px; }
     .root { padding: 18px; gap: 15px; }
 }
