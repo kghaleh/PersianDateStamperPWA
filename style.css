@@ -29,7 +29,7 @@ html, body {
         #0a192f 100%   /* آبی سیاه عمیق */
     );
     
-    background-size: 200% 200%;
+    background-size: 150% 150%;
     animation: radialMove 15s ease infinite;
     -webkit-animation: radialMove 15s ease infinite;
     
