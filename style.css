@@ -12,25 +12,26 @@ html, body {
     overflow: hidden;
     overscroll-behavior: none;
     
-    /* Fallback: Static gradient for browsers without animation support */
-    background: linear-gradient(135deg, #0a192f, #1e3a5f, #2e5266, #4a7c8e, #d4af37);
+    /* Fallback: Static radial gradient for browsers without animation support */
+    background: radial-gradient(circle at center,
+        #d4af37, #c9a961, #8b7355, #4a7c8e, #2e5266, #1e3a5f, #172a45, #0a192f
+    );
     
-    /* Animated gradient - Royal Blue & Gold */
-    background: linear-gradient(
-        135deg,
-        #0a192f 0%,    /* آبی سیاه عمیق */
-        #172a45 15%,   /* آبی شب */
-        #1e3a5f 30%,   /* آبی دریای عمیق */
-        #2e5266 45%,   /* آبی اقیانوس */
-        #417f96 60%,   /* آبی فیروزه‌ای */
-        #8b7355 75%,   /* برنز */
-        #c9b021 90%,   /* طلایی کم‌رنگ */
-        #ffee02 100%   /* طلایی درخشان */
+    /* Animated radial gradient - Royal Soft Circle */
+    background: radial-gradient(circle at 50% 50%,
+        #d4af37 0%,    /* طلایی درخشان - مرکز */
+        #c9a961 10%,   /* طلایی ملایم */
+        #8b7355 25%,   /* برنز */
+        #4a7c8e 40%,   /* آبی فیروزه‌ای */
+        #2e5266 55%,   /* آبی اقیانوس */
+        #1e3a5f 70%,   /* آبی دریای عمیق */
+        #172a45 85%,   /* آبی شب */
+        #0a192f 100%   /* آبی سیاه عمیق */
     );
     
     background-size: 200% 200%;
-    animation: gradientMove 15s ease infinite;
-    -webkit-animation: gradientMove 15s ease infinite;
+    animation: radialMove 15s ease infinite;
+    -webkit-animation: radialMove 15s ease infinite;
     
     /* Performance optimization */
     will-change: background-position;
@@ -38,8 +39,8 @@ html, body {
     transform: translateZ(0);
 }
 
-/* Standard keyframes */
-@keyframes gradientMove {
+/* Standard keyframes for radial */
+@keyframes radialMove {
     0% {
         background-position: 0% 50%;
     }
@@ -52,7 +53,7 @@ html, body {
 }
 
 /* WebKit keyframes for iOS */
-@-webkit-keyframes gradientMove {
+@-webkit-keyframes radialMove {
     0% {
         background-position: 0% 50%;
     }
