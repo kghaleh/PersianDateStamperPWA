@@ -1,73 +1,31 @@
-/* ریست پایه */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* فونت فارسی (اگر vazir.ttf در روت پروژه است) */
-@font-face {
-    font-family: "Vazir";
-    src: url("vazir.ttf") format("truetype");
-    font-weight: normal;
-    font-style: normal;
-}
-
-/* برای iOS: ارتفاع واقعی صفحه */
-:root {
-    height: -webkit-fill-available;
-}
-
-/* html و body تمام صفحه را بگیرند */
-html {
+html, body {
     width: 100%;
     height: 100%;
-    overflow: hidden;
     position: fixed;
+    overflow: hidden;
     overscroll-behavior: none;
 }
 
 body {
-    width: 100%;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    margin: 0;
-
     font-family: "Vazir", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #121212;
+    
+    /* Strong gradient background */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 100%);
+    
     color: #ffffff;
-
-    /* بک‌گراند تیره + گرادیانت */
-    background-color: #121212;
-    background-image: linear-gradient(
-        135deg,
-        #667eea 0%,
-        #764ba2 25%,
-        #f093fb 50%,
-        #4facfe 100%
-    );
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-size: cover;
-
     display: flex;
     justify-content: center;
     align-items: center;
     
-    /* پشتیبانی از Safe Area (iPhone X و بالاتر) */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-@supports (padding: max(0px)) {
-    body {
-        padding-top: max(env(safe-area-inset-top), 10px);
-        padding-bottom: max(env(safe-area-inset-bottom), 10px);
-        padding-left: max(env(safe-area-inset-left), 10px);
-        padding-right: max(env(safe-area-inset-right), 10px);
-    }
-}
-
-/* روت اپ */
 .root {
     width: 100%;
     height: 100%;
@@ -78,22 +36,32 @@ body {
     gap: 12px;
 }
 
-/* عنوان */
 .title {
     font-size: 24px;
     font-weight: bold;
     text-align: center;
     flex-shrink: 0;
+    
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+    
+    color: #ffffff;
 }
 
-/* کانتینر تصویر */
 .image-container {
     position: relative;
     width: 100%;
     flex: 1;
-    min-height: 200px;
-    background: #1e1e1e;
-    border-radius: clamp(8px, 2vw, 12px);
+    min-height: 0;
+    
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+    
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -108,7 +76,6 @@ body {
     align-items: center;
 }
 
-/* پیش‌نمایش عکس */
 .image-preview {
     max-width: 100%;
     max-height: 100%;
@@ -116,7 +83,6 @@ body {
     object-fit: contain;
 }
 
-/* متن پیش‌فرض */
 .placeholder {
     font-size: 16px;
     color: #ffffff;
@@ -137,7 +103,6 @@ body {
     flex: 1;
 }
 
-/* دکمه عمومی */
 .btn {
     padding: 16px 20px;
     font-size: 16px;
@@ -151,6 +116,11 @@ body {
     white-space: nowrap;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.5);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .btn:active {
@@ -161,7 +131,6 @@ body {
     opacity: 0.4;
 }
 
-/* استایل دکمه‌های خاص */
 .btn-camera {
     background: linear-gradient(135deg, #667eea, #764ba2);
     border-color: #764ba2;
@@ -173,11 +142,8 @@ body {
 }
 
 .btn-share {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.btn-share:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border-color: #00f2fe;
 }
 
 .developer {
@@ -190,70 +156,27 @@ body {
     font-weight: 500;
 }
 
-/* inputهای مخفی */
 .hidden-input {
     display: none;
 }
 
-/* Responsive برای موبایل‌های کوچک */
-@media (max-height: 600px) {
-    .root {
-        gap: clamp(6px, 1vh, 10px);
-    }
-    
-    .title {
-        font-size: clamp(16px, 3.5vw, 20px);
-        margin-bottom: 5px;
-    }
-    
-    .image-container {
-        min-height: 180px;
-    }
-    
-    .btn {
-        padding: clamp(10px, 2vh, 12px) clamp(12px, 2.5vw, 16px);
-        font-size: clamp(12px, 2.5vw, 14px);
-    }
+/* iPhone SE و گوشی‌های کوچک */
+@media (max-height: 667px) {
+    .title { font-size: 20px; padding: 12px; }
+    .btn { padding: 14px 16px; font-size: 15px; }
+    .root { padding: 12px; gap: 10px; }
 }
 
-/* Responsive برای صفحه‌های بسیار کوچک */
-@media (max-width: 360px) {
-    .btn {
-        font-size: 12px;
-        padding: 10px 12px;
-    }
-    
-    .title {
-        font-size: 16px;
-    }
-    
-    .image-container {
-        min-height: 150px;
-    }
+/* گوشی‌های بزرگ */
+@media (min-height: 800px) {
+    .title { font-size: 26px; padding: 18px; }
+    .btn { padding: 18px 24px; font-size: 17px; }
+    .root { padding: 18px; gap: 15px; }
 }
 
-/* Responsive برای تبلت و بالاتر */
-@media (min-width: 768px) {
-    .root {
-        max-width: 500px;
-    }
-}
-
-/* تنظیمات خاص برای iPhone با notch */
 @supports (padding: max(0px)) {
     body {
         padding-top: max(env(safe-area-inset-top), 10px);
         padding-bottom: max(env(safe-area-inset-bottom), 10px);
-    }
-}
-
-/* Landscape mode */
-@media (orientation: landscape) {
-    .image-container {
-        min-height: 50vh;
-    }
-    
-    .root {
-        gap: clamp(6px, 1vh, 12px);
     }
 }
