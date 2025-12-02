@@ -7,17 +7,16 @@
 html, body {
     width: 100%;
     height: 100%;
-    overflow: hidden;
     position: fixed;
+    overflow: hidden;
     overscroll-behavior: none;
 }
 
 body {
     font-family: "Vazir", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     
-    /* Static gradient for iOS (no animation) */
+    /* Strong gradient background */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 100%);
-    background-attachment: fixed;
     
     color: #ffffff;
     display: flex;
@@ -31,27 +30,22 @@ body {
     width: 100%;
     height: 100%;
     max-width: 600px;
-    padding: clamp(15px, 2.5vh, 25px);
     display: flex;
     flex-direction: column;
-    gap: clamp(12px, 2vh, 20px);
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+    padding: 15px;
+    gap: 12px;
 }
 
 .title {
-    font-size: clamp(20px, 4.5vw, 28px);
+    font-size: 24px;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 0;
     flex-shrink: 0;
     
-    /* Solid dark background (no blur for iOS) */
-    background: rgba(0, 0, 0, 0.75);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: clamp(12px, 3vw, 20px);
-    padding: clamp(12px, 2vh, 18px);
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 16px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
     
     color: #ffffff;
@@ -60,13 +54,12 @@ body {
 .image-container {
     position: relative;
     width: 100%;
-    flex: 1 1 auto;
+    flex: 1;
     min-height: 0;
     
-    /* Solid dark background (no blur for iOS) */
-    background: rgba(0, 0, 0, 0.65);
-    border: 2px solid rgba(255, 255, 255, 0.35);
-    border-radius: clamp(16px, 3vw, 24px);
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
     
     overflow: hidden;
@@ -88,21 +81,20 @@ body {
     max-height: 100%;
     display: none;
     object-fit: contain;
-    border-radius: clamp(12px, 2.5vw, 20px);
 }
 
 .placeholder {
-    font-size: clamp(15px, 3.2vw, 18px);
+    font-size: 16px;
     color: #ffffff;
     text-align: center;
-    padding: clamp(15px, 3.5vw, 25px);
+    padding: 20px;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     font-weight: 500;
 }
 
 .button-row {
     display: flex;
-    gap: clamp(8px, 2vw, 16px);
+    gap: 12px;
     width: 100%;
     flex-shrink: 0;
 }
@@ -112,11 +104,11 @@ body {
 }
 
 .btn {
-    padding: clamp(14px, 3vh, 18px) clamp(18px, 3.5vw, 28px);
-    font-size: clamp(14px, 3vw, 17px);
+    padding: 16px 20px;
+    font-size: 16px;
     font-weight: 600;
     border: none;
-    border-radius: clamp(12px, 2.5vw, 16px);
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
     color: white;
@@ -125,7 +117,6 @@ body {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     
-    /* Solid background (no blur) */
     background: rgba(0, 0, 0, 0.5);
     border: 2px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.5);
@@ -138,32 +129,29 @@ body {
 
 .btn:disabled {
     opacity: 0.4;
-    cursor: not-allowed;
-    transform: none;
 }
 
 .btn-camera {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85));
-    border-color: rgba(118, 75, 162, 0.6);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #764ba2;
 }
 
 .btn-gallery {
-    background: linear-gradient(135deg, rgba(240, 147, 251, 0.85), rgba(245, 87, 108, 0.85));
-    border-color: rgba(245, 87, 108, 0.6);
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    border-color: #f5576c;
 }
 
 .btn-share {
-    background: linear-gradient(135deg, rgba(79, 172, 254, 0.85), rgba(0, 242, 254, 0.85));
-    border-color: rgba(0, 242, 254, 0.6);
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border-color: #00f2fe;
 }
 
 .developer {
     text-align: center;
-    font-size: clamp(11px, 2.2vw, 13px);
+    font-size: 12px;
     color: #ffffff;
-    margin-top: auto;
     flex-shrink: 0;
-    padding-top: clamp(8px, 1.5vh, 12px);
+    padding-top: 8px;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
     font-weight: 500;
 }
@@ -172,23 +160,18 @@ body {
     display: none;
 }
 
-@media (max-height: 600px) {
-    .root { gap: clamp(8px, 1.2vh, 12px); }
-    .title { font-size: clamp(18px, 4vw, 22px); padding: clamp(10px, 1.8vh, 14px); }
-    .btn { padding: clamp(12px, 2.2vh, 14px) clamp(14px, 2.8vw, 18px); font-size: clamp(13px, 2.7vw, 15px); }
+/* iPhone SE و گوشی‌های کوچک */
+@media (max-height: 667px) {
+    .title { font-size: 20px; padding: 12px; }
+    .btn { padding: 14px 16px; font-size: 15px; }
+    .root { padding: 12px; gap: 10px; }
 }
 
-@media (max-width: 360px) {
-    .btn { font-size: 13px; padding: 12px 14px; }
-    .title { font-size: 18px; }
-}
-
-@media (min-width: 768px) {
-    .root { max-width: 550px; }
-}
-
-@media (orientation: landscape) {
-    .root { gap: clamp(8px, 1.2vh, 14px); }
+/* گوشی‌های بزرگ */
+@media (min-height: 800px) {
+    .title { font-size: 26px; padding: 18px; }
+    .btn { padding: 18px 24px; font-size: 17px; }
+    .root { padding: 18px; gap: 15px; }
 }
 
 @supports (padding: max(0px)) {
