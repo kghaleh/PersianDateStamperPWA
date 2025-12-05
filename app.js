@@ -849,40 +849,79 @@ function embedEXIFData(dataUrl, photoDate) {
             return dataUrl;
         }
 
+        // بررسی معتبر بودن DataURL
+        if (!dataUrl || typeof dataUrl !== 'string') {
+            console.warn('Invalid dataUrl, skipping EXIF');
+            return dataUrl;
+        }
+
+        // بررسی فرمت DataURL
+        if (!dataUrl.startsWith('data:image/jpeg;base64,')) {
+            console.warn('DataURL is not JPEG, skipping EXIF');
+            return dataUrl;
+        }
+
+        // استخراج base64 بدون header
+        const base64Data = dataUrl.split(',')[1];
+        
+        if (!base64Data || base64Data.length === 0) {
+            console.warn('Empty base64 data, skipping EXIF');
+            return dataUrl;
+        }
+
+        console.log('Creating EXIF object...');
         const exifObj = createEXIFObject(photoDate);
+        
+        console.log('Dumping EXIF bytes...');
         const exifBytes = piexif.dump(exifObj);
+        
+        console.log('Inserting EXIF into image...');
         const newDataUrl = piexif.insert(exifBytes, dataUrl);
         
-        console.log('EXIF data embedded successfully');
+        console.log('✅ EXIF data embedded successfully');
         return newDataUrl;
+        
     } catch (e) {
-        console.warn('Failed to embed EXIF:', e);
+        console.error('Failed to embed EXIF - Details:');
+        console.error('Error name:', e.name);
+        console.error('Error message:', e.message);
+        console.error('Error stack:', e.stack);
+        console.warn('Continuing without EXIF metadata');
         return dataUrl;
     }
 }
 
-// ساخت EXIF object از تاریخ
+// ساخت EXIF object از تاریخ (ساده شده)
 function createEXIFObject(date) {
     const dateStr = formatDateForEXIF(date);
-    const persianDateStr = formatPersianDateForEXIF(date);
     
-    // برای متن فارسی، از ASCII استفاده کن (فارسی رو نمیشه نوشت)
-    const englishComment = `Persian Date: ${dateStr}`;
-    
-    return {
-        "0th": {
-            [piexif.ImageIFD.Make]: "Persian Date Stamper",
-            [piexif.ImageIFD.Model]: "PWA v1.0",
-            [piexif.ImageIFD.Software]: "Persian Date Stamper PWA",
-            [piexif.ImageIFD.DateTime]: dateStr,
-            [piexif.ImageIFD.Artist]: "Arshia"
-        },
-        "Exif": {
-            [piexif.ExifIFD.DateTimeOriginal]: dateStr,
-            [piexif.ExifIFD.DateTimeDigitized]: dateStr,
-            [piexif.ExifIFD.UserComment]: piexif.helper.encodeUserComment(englishComment)
-        }
-    };
+    try {
+        // فقط فیلدهای اصلی - بدون UserComment
+        const exifObj = {
+            "0th": {
+                [piexif.ImageIFD.DateTime]: dateStr,
+                [piexif.ImageIFD.Make]: "Persian Date Stamper",
+                [piexif.ImageIFD.Model]: "PWA"
+            },
+            "Exif": {
+                [piexif.ExifIFD.DateTimeOriginal]: dateStr,
+                [piexif.ExifIFD.DateTimeDigitized]: dateStr
+            }
+        };
+        
+        console.log('EXIF object created:', exifObj);
+        return exifObj;
+        
+    } catch (e) {
+        console.error('Error creating EXIF object:', e);
+        // حداقل EXIF - فقط تاریخ
+        return {
+            "0th": {},
+            "Exif": {
+                [piexif.ExifIFD.DateTimeOriginal]: dateStr
+            }
+        };
+    }
 }
 
 // فرمت EXIF: "YYYY:MM:DD HH:MM:SS"
