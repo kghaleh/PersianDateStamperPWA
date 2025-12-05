@@ -866,17 +866,21 @@ function createEXIFObject(date) {
     const dateStr = formatDateForEXIF(date);
     const persianDateStr = formatPersianDateForEXIF(date);
     
+    // برای متن فارسی، از ASCII استفاده کن (فارسی رو نمیشه نوشت)
+    const englishComment = `Persian Date: ${dateStr}`;
+    
     return {
         "0th": {
             [piexif.ImageIFD.Make]: "Persian Date Stamper",
             [piexif.ImageIFD.Model]: "PWA v1.0",
             [piexif.ImageIFD.Software]: "Persian Date Stamper PWA",
-            [piexif.ImageIFD.DateTime]: dateStr
+            [piexif.ImageIFD.DateTime]: dateStr,
+            [piexif.ImageIFD.Artist]: "Arshia"
         },
         "Exif": {
             [piexif.ExifIFD.DateTimeOriginal]: dateStr,
             [piexif.ExifIFD.DateTimeDigitized]: dateStr,
-            [piexif.ExifIFD.UserComment]: persianDateStr
+            [piexif.ExifIFD.UserComment]: piexif.helper.encodeUserComment(englishComment)
         }
     };
 }
