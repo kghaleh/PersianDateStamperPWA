@@ -473,15 +473,32 @@ function gregorianToPersian(date) {
     return { year: jy, month: jm, day: jd };
 }
 
-/* ------------------ فیلترها: Dehaze + Clarity + Saturation ------------------ */
+/* ------------------ فیلترها: Tone Mapping + Dehaze + Clarity + Vibrance ------------------ */
 
-function enhanceImage(ctx, width, height, dehazeStrength = 0.18, clarityStrength = 0.3, saturationBoost = 1.03) {
+function enhanceImage(ctx, width, height, 
+    toneMappingStrength = 0.4,   // جدید: Tone Mapping
+    dehazeStrength = 0.18, 
+    clarityStrength = 0.3, 
+    vibranceStrength = 0.15      // جدید: Vibrance (بهتر از Saturation)
+) {
+    // 1. Tone Mapping - تنظیم تون برای Dynamic Range بهتر
+    if (toneMappingStrength > 0) {
+        try {
+            applyToneMapping(ctx, width, height, toneMappingStrength);
+            console.log('Tone Mapping applied');
+        } catch (e) {
+            console.warn('Tone Mapping filter failed:', e);
+        }
+    }
+
+    // 2. Dehaze - حذف مه و افزایش کنتراست
     try {
         applyDehaze(ctx, width, height, dehazeStrength);
     } catch (e) {
         console.warn('Dehaze filter failed:', e);
     }
 
+    // 3. Clarity - تیز کردن لبه‌ها
     if (clarityStrength > 0) {
         try {
             applyClarity(ctx, width, height, clarityStrength);
@@ -490,13 +507,58 @@ function enhanceImage(ctx, width, height, dehazeStrength = 0.18, clarityStrength
         }
     }
 
-    if (saturationBoost !== 1.0) {
+    // 4. Vibrance - رنگ‌های زنده (بهتر از Saturation)
+    if (vibranceStrength > 0) {
         try {
-            applySaturation(ctx, width, height, saturationBoost);
+            applyVibrance(ctx, width, height, vibranceStrength);
+            console.log('Vibrance applied');
         } catch (e) {
-            console.warn('Saturation filter failed:', e);
+            console.warn('Vibrance filter failed:', e);
         }
     }
+}
+
+function applyToneMapping(ctx, width, height, strength) {
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const d = imgData.data;
+
+    // محاسبه میانگین روشنایی
+    let avgBrightness = 0;
+    for (let i = 0; i < d.length; i += 4) {
+        const r = d[i];
+        const g = d[i+1];
+        const b = d[i+2];
+        // روشنایی نسبی
+        const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+        avgBrightness += brightness;
+    }
+    avgBrightness /= (d.length / 4);
+
+    // Tone Mapping با فرمول Reinhard
+    for (let i = 0; i < d.length; i += 4) {
+        const r = d[i];
+        const g = d[i+1];
+        const b = d[i+2];
+
+        // نرمال کردن به [0, 1]
+        const rNorm = r / 255.0;
+        const gNorm = g / 255.0;
+        const bNorm = b / 255.0;
+
+        // Tone mapping با تنظیم قابل کنترل
+        const scale = strength * (avgBrightness / 128.0);
+        
+        const rMapped = rNorm / (1.0 + rNorm * scale);
+        const gMapped = gNorm / (1.0 + gNorm * scale);
+        const bMapped = bNorm / (1.0 + bNorm * scale);
+
+        // برگشت به [0, 255]
+        d[i]   = clamp(rMapped * 255.0);
+        d[i+1] = clamp(gMapped * 255.0);
+        d[i+2] = clamp(bMapped * 255.0);
+    }
+
+    ctx.putImageData(imgData, 0, 0);
 }
 
 function applyDehaze(ctx, width, height, strength) {
@@ -551,7 +613,7 @@ function applyClarity(ctx, width, height, strength) {
     ctx.putImageData(original, 0, 0);
 }
 
-function applySaturation(ctx, width, height, sat) {
+function applyVibrance(ctx, width, height, strength) {
     const imgData = ctx.getImageData(0, 0, width, height);
     const d = imgData.data;
 
@@ -562,11 +624,21 @@ function applySaturation(ctx, width, height, sat) {
         const g = d[i+1];
         const b = d[i+2];
 
-        const gray = rw*r + gw*g + bw*b;
+        // محاسبه gray scale
+        const gray = rw * r + gw * g + bw * b;
 
-        d[i]   = clamp(gray + sat * (r - gray));
-        d[i+1] = clamp(gray + sat * (g - gray));
-        d[i+2] = clamp(gray + sat * (b - gray));
+        // محاسبه میزان اشباع فعلی
+        const maxRGB = Math.max(r, g, b);
+        const minRGB = Math.min(r, g, b);
+        const currentSaturation = (maxRGB - minRGB) / (maxRGB + 0.001);
+
+        // Vibrance: رنگ‌های کم‌رنگ بیشتر تقویت می‌شن
+        // رنگ‌های اشباع کمتر تغییر می‌کنن
+        const vibranceAmount = strength * (1.0 - currentSaturation);
+
+        d[i]   = clamp(gray + (1.0 + vibranceAmount) * (r - gray));
+        d[i+1] = clamp(gray + (1.0 + vibranceAmount) * (g - gray));
+        d[i+2] = clamp(gray + (1.0 + vibranceAmount) * (b - gray));
     }
 
     ctx.putImageData(imgData, 0, 0);
