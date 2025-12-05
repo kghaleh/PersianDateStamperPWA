@@ -16,6 +16,9 @@ let realCtx = null;
 // این همیشه به canvas فول‌سایز اشاره می‌کند
 let currentImageCanvas = null;
 
+// ذخیره تاریخ اصلی عکس برای EXIF
+let originalPhotoDate = null;
+
 // ------------------ Service Worker ------------------
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -108,6 +111,9 @@ async function handleFileInput(e) {
             photoDate = new Date(file.lastModified);
             console.log('Using lastModified date:', photoDate);
         }
+
+        // ذخیره تاریخ اصلی برای نوشتن EXIF در فایل نهایی
+        originalPhotoDate = photoDate;
 
         console.log('Step 3: Processing image...');
         await drawAndProcessImage(img, photoDate);
@@ -739,7 +745,16 @@ function roundRect(ctx, x, y, w, h, r) {
 async function handleShareOrDownload() {
     if (!currentImageCanvas) return;
 
-    currentImageCanvas.toBlob(async blob => {
+    try {
+        // تبدیل Canvas به DataURL با کیفیت بالا
+        const dataUrl = currentImageCanvas.toDataURL('image/jpeg', 0.95);
+        
+        // اضافه کردن EXIF به تصویر
+        const dataUrlWithEXIF = embedEXIFData(dataUrl, originalPhotoDate || new Date());
+        
+        // تبدیل DataURL به Blob
+        const blob = await dataURLtoBlob(dataUrlWithEXIF);
+        
         if (!blob) return;
 
         const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
@@ -765,7 +780,116 @@ async function handleShareOrDownload() {
             downloadBlob(blob, "persian-date-photo.jpg");
             clearCacheNow();
         }
-    }, "image/jpeg", 0.9);
+    } catch (error) {
+        console.error('Error in handleShareOrDownload:', error);
+        // Fallback: استفاده از روش قدیمی بدون EXIF
+        currentImageCanvas.toBlob(async blob => {
+            if (!blob) return;
+            const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
+            
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], title: "Persian Date Photo", text: "" });
+                    clearCacheNow();
+                } catch (e) {
+                    downloadBlob(blob, "persian-date-photo.jpg");
+                    clearCacheNow();
+                }
+            } else {
+                downloadBlob(blob, "persian-date-photo.jpg");
+                clearCacheNow();
+            }
+        }, "image/jpeg", 0.9);
+    }
+}
+
+// تبدیل DataURL به Blob
+function dataURLtoBlob(dataUrl) {
+    return new Promise((resolve) => {
+        try {
+            const arr = dataUrl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            resolve(new Blob([u8arr], { type: mime }));
+        } catch (e) {
+            console.error('Error converting DataURL to Blob:', e);
+            resolve(null);
+        }
+    });
+}
+
+// نوشتن EXIF روی تصویر نهایی
+function embedEXIFData(dataUrl, photoDate) {
+    try {
+        // بررسی وجود کتابخانه piexif
+        if (typeof piexif === 'undefined') {
+            console.warn('piexif library not loaded, skipping EXIF');
+            return dataUrl;
+        }
+
+        const exifObj = createEXIFObject(photoDate);
+        const exifBytes = piexif.dump(exifObj);
+        const newDataUrl = piexif.insert(exifBytes, dataUrl);
+        
+        console.log('EXIF data embedded successfully');
+        return newDataUrl;
+    } catch (e) {
+        console.warn('Failed to embed EXIF:', e);
+        return dataUrl;
+    }
+}
+
+// ساخت EXIF object از تاریخ
+function createEXIFObject(date) {
+    const dateStr = formatDateForEXIF(date);
+    const persianDateStr = formatPersianDateForEXIF(date);
+    
+    return {
+        "0th": {
+            [piexif.ImageIFD.Make]: "Persian Date Stamper",
+            [piexif.ImageIFD.Model]: "PWA v1.0",
+            [piexif.ImageIFD.Software]: "Persian Date Stamper PWA",
+            [piexif.ImageIFD.DateTime]: dateStr
+        },
+        "Exif": {
+            [piexif.ExifIFD.DateTimeOriginal]: dateStr,
+            [piexif.ExifIFD.DateTimeDigitized]: dateStr,
+            [piexif.ExifIFD.UserComment]: persianDateStr
+        }
+    };
+}
+
+// فرمت EXIF: "YYYY:MM:DD HH:MM:SS"
+function formatDateForEXIF(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    const second = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${year}:${month}:${day} ${hour}:${minute}:${second}`;
+}
+
+// فرمت تاریخ فارسی برای UserComment
+function formatPersianDateForEXIF(date) {
+    const persianDate = gregorianToPersian(date);
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    
+    const monthNames = [
+        "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
+        "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
+    ];
+    
+    const monthName = monthNames[persianDate.month - 1];
+    
+    return `تاریخ فارسی: ${persianDate.day} ${monthName} ${persianDate.year} - ساعت ${hour}:${minute}`;
 }
 
 // اشتراک‌گذاری مستقیم به واتس‌آپ
