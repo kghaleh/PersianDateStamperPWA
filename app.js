@@ -331,6 +331,16 @@ function parseEXIFDate(view, offset) {
     }
 }
 
+// تابع کمکی: لود تصویر از DataURL
+function loadImageFromDataURL(dataUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = dataUrl;
+    });
+}
+
 // ------------------ پردازش تصویر (فول‌سایز + preview) ------------------
 async function drawAndProcessImage(img, date) {
     try {
@@ -388,9 +398,31 @@ async function drawAndProcessImage(img, date) {
 
         // ۴) افزودن استمپ روی فول‌سایز
         await addTextToCanvas(realCtx, realCanvas, fullTextFarsi);
-        console.log('Text added to canvas');
+        console.log('✅ Step 3 completed: Text stamped on canvas');
 
-        // ۵) ساخت preview برای نمایش در صفحه
+        // ۵) نوشتن EXIF بعد از استمپ
+        console.log('Step 4: Writing EXIF metadata...');
+        try {
+            // تبدیل Canvas به DataURL
+            const dataUrl = realCanvas.toDataURL('image/jpeg', 0.95);
+            
+            // اضافه کردن EXIF
+            const dataUrlWithEXIF = embedEXIFData(dataUrl, date);
+            
+            // تبدیل DataURL با EXIF به Image
+            const imgWithEXIF = await loadImageFromDataURL(dataUrlWithEXIF);
+            
+            // رسم دوباره روی Canvas (حالا با EXIF)
+            realCtx.clearRect(0, 0, realCanvas.width, realCanvas.height);
+            realCtx.drawImage(imgWithEXIF, 0, 0);
+            
+            console.log('✅ Step 4 completed: EXIF written with date:', formatDateForEXIF(date));
+        } catch (exifError) {
+            console.error('⚠️ EXIF write failed:', exifError);
+            // ادامه بدون EXIF (عکس با استمپ هست)
+        }
+
+        // ۶) ساخت preview برای نمایش در صفحه
         const container = previewCanvas.parentElement;
         const containerWidth = container.clientWidth || 400;
         const containerHeight = container.clientHeight || 400;
@@ -409,8 +441,10 @@ async function drawAndProcessImage(img, date) {
         previewCtx.drawImage(realCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
         console.log('Preview rendered');
 
-        currentImageCanvas = realCanvas; // خروجی فول‌رزولوشن
+        currentImageCanvas = realCanvas; // خروجی فول‌رزولوشن با EXIF
         btnShare.disabled = false;
+        
+        console.log('=== drawAndProcessImage completed successfully ===');
         
     } catch (error) {
         console.error('Error in drawAndProcessImage:', error);
@@ -746,60 +780,43 @@ async function handleShareOrDownload() {
     if (!currentImageCanvas) return;
 
     try {
-        // تبدیل Canvas به DataURL با کیفیت بالا
-        const dataUrl = currentImageCanvas.toDataURL('image/jpeg', 0.95);
-        
-        // اضافه کردن EXIF به تصویر
-        const dataUrlWithEXIF = embedEXIFData(dataUrl, originalPhotoDate || new Date());
-        
-        // تبدیل DataURL به Blob
-        const blob = await dataURLtoBlob(dataUrlWithEXIF);
-        
-        if (!blob) return;
-
-        const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
-
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                await navigator.share({
-                    files: [file],
-                    title: "Persian Date Photo",
-                    text: ""
-                });
-
-                // عملیات موفق → کش را پاک کن
-                clearCacheNow();
-
-            } catch (e) {
-                // اگر share شکست خورد، دانلود محلی
-                downloadBlob(blob, "persian-date-photo.jpg");
-                clearCacheNow();
+        // Canvas قبلاً EXIF داره (از drawAndProcessImage)
+        // پس فقط تبدیل به Blob کن
+        currentImageCanvas.toBlob(async (blob) => {
+            if (!blob) {
+                console.error('Failed to create blob from canvas');
+                return;
             }
-        } else {
-            // share در دسترس نیست → دانلود
-            downloadBlob(blob, "persian-date-photo.jpg");
-            clearCacheNow();
-        }
-    } catch (error) {
-        console.error('Error in handleShareOrDownload:', error);
-        // Fallback: استفاده از روش قدیمی بدون EXIF
-        currentImageCanvas.toBlob(async blob => {
-            if (!blob) return;
+
             const file = new File([blob], "persian-date-photo.jpg", { type: "image/jpeg" });
-            
+
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
-                    await navigator.share({ files: [file], title: "Persian Date Photo", text: "" });
+                    await navigator.share({
+                        files: [file],
+                        title: "Persian Date Photo",
+                        text: ""
+                    });
+
+                    // عملیات موفق → کش را پاک کن
                     clearCacheNow();
+
                 } catch (e) {
+                    console.log('Share cancelled or failed, downloading instead');
+                    // اگر share شکست خورد، دانلود محلی
                     downloadBlob(blob, "persian-date-photo.jpg");
                     clearCacheNow();
                 }
             } else {
+                // share در دسترس نیست → دانلود
                 downloadBlob(blob, "persian-date-photo.jpg");
                 clearCacheNow();
             }
-        }, "image/jpeg", 0.9);
+        }, "image/jpeg", 0.95);
+        
+    } catch (error) {
+        console.error('Error in handleShareOrDownload:', error);
+        alert('خطا در اشتراک‌گذاری: ' + error.message);
     }
 }
 
