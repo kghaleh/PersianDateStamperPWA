@@ -385,14 +385,21 @@ async function drawAndProcessImage(img, date) {
         }
 
         // ۳) محاسبه تاریخ و متن
-        const persianDate = gregorianToPersian(date);
+       const persianDate = gregorianToPersian(date);
         const hour = date.getHours();
         const minute = date.getMinutes();
-        const timeStr = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
         const weekdayFa = persianWeekDays[date.getDay()];
-        const dateText = `${persianDate.year}/${persianDate.month}/${persianDate.day}`;
-        const fullText = `${weekdayFa}  ${dateText}  ${timeStr}`;
+
+        // نام ماه‌های فارسی
+        const monthNames = [
+        "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
+        "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
+        ];
+        const monthName = monthNames[persianDate.month - 1];
+
+        // فرمت جدید: یکشنبه 12 آبان 1404 - ساعت 12:35
+        const fullText = `${weekdayFa} ${persianDate.day} ${monthName} ${persianDate.year} - ساعت ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
         const fullTextFarsi = convertToFarsiDigits(fullText);
         console.log('Date text:', fullTextFarsi);
 
