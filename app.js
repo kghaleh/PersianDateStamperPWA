@@ -502,9 +502,9 @@ function gregorianToPersian(date) {
 
 function enhanceImage(ctx, width, height, 
     toneMappingStrength = 0.4,   // جدید: Tone Mapping
-    dehazeStrength = 0.18, 
-    clarityStrength = 0.5, 
-    vibranceStrength = 0.15      // جدید: Vibrance (بهتر از Saturation)
+    dehazeStrength = 0.30, 
+    clarityStrength = 0.7 ,
+    vibranceStrength = 0.15 ,     // جدید: Vibrance (بهتر از Saturation)
 ) {
     // 1. Tone Mapping - تنظیم تون برای Dynamic Range بهتر
     if (toneMappingStrength > 0) {
