@@ -501,12 +501,13 @@ function gregorianToPersian(date) {
 /* ------------------ فیلترها: Tone Mapping + Dehaze + Clarity + Vibrance ------------------ */
 
 function enhanceImage(ctx, width, height, 
-    toneMappingStrength = 0.4,   // جدید: Tone Mapping
-    dehazeStrength = 0.30, 
-    clarityStrength = 0.7 ,
-    vibranceStrength = 0.15 ,     // جدید: Vibrance (بهتر از Saturation)
+    toneMappingStrength = 0.3,
+    dehazeStrength = 0.25, 
+    clarityStrength = 0.7,
+    vibranceStrength = 0.1,
+    sharpeningStrength = 0.4    // ← جدید!
 ) {
-    // 1. Tone Mapping - تنظیم تون برای Dynamic Range بهتر
+    // 1. Tone Mapping
     if (toneMappingStrength > 0) {
         try {
             applyToneMapping(ctx, width, height, toneMappingStrength);
@@ -516,14 +517,14 @@ function enhanceImage(ctx, width, height,
         }
     }
 
-    // 2. Dehaze - حذف مه و افزایش کنتراست
+    // 2. Dehaze
     try {
         applyDehaze(ctx, width, height, dehazeStrength);
     } catch (e) {
         console.warn('Dehaze filter failed:', e);
     }
 
-    // 3. Clarity - تیز کردن لبه‌ها
+    // 3. Clarity
     if (clarityStrength > 0) {
         try {
             applyClarity(ctx, width, height, clarityStrength);
@@ -532,13 +533,23 @@ function enhanceImage(ctx, width, height,
         }
     }
 
-    // 4. Vibrance - رنگ‌های زنده (بهتر از Saturation)
+    // 4. Vibrance
     if (vibranceStrength > 0) {
         try {
             applyVibrance(ctx, width, height, vibranceStrength);
             console.log('Vibrance applied');
         } catch (e) {
             console.warn('Vibrance filter failed:', e);
+        }
+    }
+
+    // 5. Sharpening (جدید!)
+    if (sharpeningStrength > 0) {
+        try {
+            applySharpening(ctx, width, height, sharpeningStrength);
+            console.log('Sharpening applied');
+        } catch (e) {
+            console.warn('Sharpening filter failed:', e);
         }
     }
 }
@@ -667,6 +678,54 @@ function applyVibrance(ctx, width, height, strength) {
     }
 
     ctx.putImageData(imgData, 0, 0);
+}
+
+function applySharpening(ctx, width, height, strength) {
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const d = imgData.data;
+    
+    // Kernel برای Sharpening
+    const kernel = [
+         0, -1,  0,
+        -1,  5, -1,
+         0, -1,  0
+    ];
+    
+    const side = Math.round(Math.sqrt(kernel.length));
+    const halfSide = Math.floor(side / 2);
+    
+    const output = ctx.createImageData(width, height);
+    const dst = output.data;
+    
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const dstOff = (y * width + x) * 4;
+            let r = 0, g = 0, b = 0;
+            
+            for (let cy = 0; cy < side; cy++) {
+                for (let cx = 0; cx < side; cx++) {
+                    const scy = y + cy - halfSide;
+                    const scx = x + cx - halfSide;
+                    
+                    if (scy >= 0 && scy < height && scx >= 0 && scx < width) {
+                        const srcOff = (scy * width + scx) * 4;
+                        const wt = kernel[cy * side + cx];
+                        r += d[srcOff] * wt;
+                        g += d[srcOff + 1] * wt;
+                        b += d[srcOff + 2] * wt;
+                    }
+                }
+            }
+            
+            // Blend با strength
+            dst[dstOff] = clamp(d[dstOff] * (1 - strength) + r * strength);
+            dst[dstOff + 1] = clamp(d[dstOff + 1] * (1 - strength) + g * strength);
+            dst[dstOff + 2] = clamp(d[dstOff + 2] * (1 - strength) + b * strength);
+            dst[dstOff + 3] = d[dstOff + 3];
+        }
+    }
+    
+    ctx.putImageData(output, 0, 0);
 }
 
 function clamp(v) {
