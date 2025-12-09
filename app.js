@@ -502,10 +502,10 @@ function gregorianToPersian(date) {
 
 function enhanceImage(ctx, width, height, 
     toneMappingStrength = 0.3,
-    dehazeStrength = 0.25, 
-    clarityStrength = 0.7,
-    vibranceStrength = 0.1,
-    sharpeningStrength = 0.4    // ← جدید!
+    dehazeStrength = 0.30, 
+    clarityStrength = 0.8,
+    vibranceStrength = 0.05,
+    sharpeningStrength = 0.6    // ← جدید!
 ) {
     // 1. Tone Mapping
     if (toneMappingStrength > 0) {
